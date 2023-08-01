@@ -4,14 +4,14 @@ Generic single-database configuration.
 1)
 запуск
 #
-docker compose -f docker-compose-local.yaml up --build
+docker compose up --build
 #
 
 
 2)
 Для накатывания миграций, если файла alembic.ini еще нет, нужно запустить в терминале команду:
 #
-alembic init migrations
+/Auth_sprint_1/src/alembic init migrations
 #
 после этого будет создана папка с миграциями и конфигурационный файл алембика
 
@@ -28,7 +28,7 @@ postgres:postgres - это логин и пароль
 #
 from myapp import mymodel
 # меняем на
-from main import Base
+from db.users import Base
 #
 target_metadata = Base.metadata
 #
@@ -36,13 +36,13 @@ target_metadata = Base.metadata
 5)
 Дальше вводим:
 #
-alembic revision --autogenerate -m "create table user"
+/Auth_sprint_1/src/alembic revision --autogenerate -m "create table user"
 #
 Будет создана миграция
 
 6)
 Дальше вводим:
 #
-alembic upgrade heads
+/Auth_sprint_1/src/alembic upgrade heads
 #
 будут обновлены заголовки таблицы
