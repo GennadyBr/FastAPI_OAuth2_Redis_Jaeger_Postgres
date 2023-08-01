@@ -1,0 +1,29 @@
+repos:
+  - repo: local
+    hooks:
+      - id: flake8
+        name: flake8
+        entry: flake8
+        language: system
+        types: [ python ]
+        args: [
+          "--ignore=E203,W503,FI10,FI11,FI12,FI13,FI14,FI15,FI16,FI17,FI58,PT013",
+          # black
+          # E203 whitespace before ':'
+          # W503 line break before binary operator
+          # flake8-future-import
+          # FI10 __future__ import "division" missing
+          # FI11 __future__ import "absolute_import" missing
+          # FI12 __future__ import "with_statement" missing
+          # FI13 __future__ import "print_function" missing
+          # FI14 __future__ import "unicode_literals" missing
+          # FI15 __future__ import "generator_stop" missing
+          # FI16 __future__ import "nested_scopes" missing
+          # FI17 __future__ import "generators" missing
+          # FI58 __future__ import "annotations" present
+          # flake8-pytest-style
+          # PT013 found incorrect import of pytest, use simple 'import pytest' instead
+          "--max-line-length=110",
+          "--per-file-ignores=tests/*.py:S101"
+          # S101 Use of assert detected
+        ]

@@ -1,0 +1,24 @@
+version: '3'
+services:
+  db_users:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      # - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env
+
+  redis_token:
+    image: redis:7.2-rc2
+    restart: on-failure
+
+  auth:
+    build: .
+    env_file:
+      - .env
+    depends_on:
+      - redis_token
+      - db_users
+
+volumes:
+  postgres_data:
