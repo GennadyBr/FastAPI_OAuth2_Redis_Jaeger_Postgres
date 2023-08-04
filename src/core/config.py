@@ -2,11 +2,23 @@ from logging import config as logging_config
 from pathlib import Path
 
 from pydantic import BaseSettings
+from envparse import Env
 
 from core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
+def user_db_settings():
+    pass
+
+env = Env()
+
+REAL_DATABASE_URL = env.str(
+    "REAL_DATABASE_URL",
+    default="postgresql+asyncpg://postgres:postgres@0.0.0.0:5432/postgres"
+) #connect string to database
+# postgresql+asyncpg - это драйвер подключения что бы алхимия синхронного подключалась
+# postgres:postgres - это логин и пароль
 
 class AuthSettings(BaseSettings):
     project_name: str = 'Auth service'

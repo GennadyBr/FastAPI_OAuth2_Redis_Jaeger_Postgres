@@ -23,7 +23,7 @@ class TunedModel(BaseModel):  # наследуется от BaseModel pydentic
 
 class ShowUser(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    user_id: uuid.UUID  # в алхимии другой UUID из алхимии
+    uuid: uuid.UUID  # в алхимии другой UUID из алхимии
     name: str
     surname: str
     login: str
@@ -34,7 +34,7 @@ class ShowUser(TunedModel):
 
 class ShowRole(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    role_id: uuid.UUID  # в алхимии другой UUID из алхимии
+    uuid: uuid.UUID  # в алхимии другой UUID из алхимии
     name: str
 
 

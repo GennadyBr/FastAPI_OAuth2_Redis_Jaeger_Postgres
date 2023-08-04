@@ -13,7 +13,7 @@ class UserDAL:  # User Data Access Layer создание, удаление и �
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def create_user(
+    async def create(
             self, name: str, surname: str, login: str, email: str, hashed_password: str) -> User:
         """Create User"""
         # сюда позже добавить хеширование паролей
@@ -29,13 +29,13 @@ class UserDAL:  # User Data Access Layer создание, удаление и �
         # сюда позже можно добавить проверки на существование такого пользователя
         return new_user
 
-    async def read_user():
+    async def read(self):
         pass
 
-    async def update_user():
+    async def update(self):
         pass
 
-    async def del_user():
+    async def delete(self):
         pass
 
 
@@ -46,7 +46,7 @@ class RoleDAL:  # User Data Access Layer создание, удаление и �
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def create_role(self, name: str) -> User:
+    async def create(self, name: str) -> User:
         """Create Role"""
         new_role = Role(
             name=name,
@@ -56,12 +56,12 @@ class RoleDAL:  # User Data Access Layer создание, удаление и �
         # сюда позже можно добавить проверки на существование такой роли
         return new_role
 
-    async def read_role():
+    async def read(self):
         pass
 
-    async def update_role():
+    async def update(self):
         pass
 
-    async def del_role():
+    async def delete(self):
         pass
 

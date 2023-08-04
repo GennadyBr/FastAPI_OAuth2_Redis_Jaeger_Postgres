@@ -13,7 +13,7 @@ async def _create_new_user(body: UserCreate, db) -> ShowUser:
     async with db as session:
         async with session.begin():
             user_dal = UserDAL(session)
-            user = await user_dal.create_user(  # создаем юзера в алхимии и получаем его обратно с id и is_active
+            user = await user_dal.create(  # создаем юзера в алхимии и получаем его обратно с id и is_active
                 name=body.name,
                 surname=body.surname,
                 login=body.login,
@@ -21,7 +21,7 @@ async def _create_new_user(body: UserCreate, db) -> ShowUser:
                 hashed_password=body.hashed_password
             )
             return ShowUser(
-                user_id=user.user_id,
+                uuid=user.uuid,
                 name=user.name,
                 surname=user.surname,
                 login=user.login,
@@ -41,11 +41,11 @@ async def _create_new_role(body: RoleCreate, db) -> ShowRole:
     async with db as session:
         async with session.begin():
             role_dal = RoleDAL(session)
-            role = await role_dal.create_role(  # создаем роль в алхимии и получаем ее обратно
+            role = await role_dal.create(  # создаем роль в алхимии и получаем ее обратно
                 name=body.name
             )
             return ShowRole(
-                role_id=role.role_id,
+                uuid=role.uuid,
                 name=role.name,
             )
 

@@ -3,7 +3,7 @@ from typing import Generator
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from settings import REAL_DATABASE_URL
+from core.config import REAL_DATABASE_URL
 
 #############################################
 # BLOCK FOR COMMON INTERATION WITH DATABASE #
