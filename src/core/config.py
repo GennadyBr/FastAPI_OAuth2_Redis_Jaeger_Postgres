@@ -3,6 +3,10 @@ from pathlib import Path
 
 from pydantic import BaseSettings
 from envparse import Env
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from core.logger import LOGGING
 
@@ -15,10 +19,16 @@ env = Env()
 
 REAL_DATABASE_URL = env.str(
     "REAL_DATABASE_URL",
-    default="postgresql+asyncpg://postgres:postgres@0.0.0.0:5432/postgres"
+    default=f'postgresql+asyncpg://{os.getenv("PG_LOGIN")}:{os.getenv("PG_PWD")}@0.0.0.0:5432/postgres'
 ) #connect string to database
 # postgresql+asyncpg - это драйвер подключения что бы алхимия синхронного подключалась
 # postgres:postgres - это логин и пароль
+
+
+class UserDBSettings(BaseSettings):
+    SQLALCHEMY_DATABASE_URL = f'postgresql://{os.getenv("PG_LOGIN")}:{os.getenv("PG_PWD")}@0.0.0.0:5432/postgres'
+
+
 
 class AuthSettings(BaseSettings):
     project_name: str = 'Auth service'
@@ -42,3 +52,4 @@ class RedisSettings(BaseSettings):
 
 auth_settings = AuthSettings()
 redis_settings = RedisSettings()
+user_db_settings = UserDBSettings()
