@@ -22,7 +22,6 @@ REAL_DATABASE_URL = env.str(
     default=f'postgresql+asyncpg://{os.getenv("PG_LOGIN")}:{os.getenv("PG_PWD")}@0.0.0.0:5432/postgres'
 ) #connect string to database
 # postgresql+asyncpg - это драйвер подключения что бы алхимия синхронного подключалась
-# postgres:postgres - это логин и пароль
 
 
 class UserDBSettings(BaseSettings):
