@@ -5,7 +5,6 @@ services:
     image: postgres:13
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-      # - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - .env
     ports:
@@ -27,26 +26,3 @@ volumes:
   postgres_data:
 
 
-#
-#version: "3.0"
-#services:
-#  db_users:
-#    container_name: "db_users"
-#    image: postgres:13
-#    restart: always
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data/
-#    environment:
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=postgres
-#      - POSTGRES_DB=postgres
-#      - POSTGRES_HOST=postgres
-#    ports:
-#      - "5432:5432"
-#    networks:
-#      - custom
-#networks:
-#  custom:
-#    driver: bridge
-#volumes:
-#  postgres_data:

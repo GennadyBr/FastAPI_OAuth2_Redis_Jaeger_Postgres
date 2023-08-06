@@ -30,7 +30,7 @@ class User(Base):
     login = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     is_active = Column(Boolean(), default=True)
-    hashed_password = Column(String, nullable=False, unique=True)  # пока строка
+    password = Column(String, nullable=False, unique=True)
 
 
 class Role(Base):
@@ -46,7 +46,7 @@ class Entry(Base):
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey(User.uuid), nullable=False)
     user_agent = Column(String)# что пустая стока, что null не несут полезной информации
-    date_time = Column(String, default='default_time', nullable=False)
+    date_time = Column(DateTime, default=datetime.utcnow, nullable=False)
     refresh_token = Column(String, default='')
     is_active = Column(Boolean(), default=True)
 

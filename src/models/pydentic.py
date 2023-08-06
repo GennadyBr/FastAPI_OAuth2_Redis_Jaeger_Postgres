@@ -1,7 +1,5 @@
 import re
 import uuid
-from datetime import datetime
-
 from fastapi import HTTPException
 from pydantic import BaseModel, EmailStr, validator
 
@@ -29,7 +27,7 @@ class ShowUser(TunedModel):
     login: str
     email: EmailStr
     is_active: bool
-    hashed_password: str  #
+    password: str  #
 
 
 class ShowRole(TunedModel):
@@ -61,11 +59,11 @@ class UserCreate(BaseModel):
     surname: str
     login: str
     email: EmailStr
-    hashed_password: str
+    password: str
 
     @validator("name")
     def validate_name(cls, value):
-        if not LETTER_MATCH_PATTERN.match(value):
+        if not value.isalpha():
             raise HTTPException(
                 status_code=422, detail="Name should contains only letters"
             )
@@ -73,11 +71,15 @@ class UserCreate(BaseModel):
 
     @validator("surname")
     def validate_surname(cls, value):
-        if not LETTER_MATCH_PATTERN.match(value):
+        if not value.isalpha():
             raise HTTPException(
                 status_code=422, detail="Surname should contains only letters"
             )
         return value
+
+
+class DeleteUserResponse(BaseModel):
+    deleted_user_id: uuid.UUID
 
 
 class RoleCreate(BaseModel):
