@@ -30,7 +30,6 @@ class UserDBSettings(BaseSettings):
         return cls._url(asyncpg=True)
 
 
-
 class AuthSettings(BaseSettings):
     project_name: str = 'Auth service'
     base_dir: Path = Path(__file__).resolve(strict=True).parent.parent
