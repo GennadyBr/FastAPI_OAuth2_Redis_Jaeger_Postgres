@@ -33,19 +33,31 @@ class UserDAL:  # User Data Access Layer создание, удаление и �
         # сюда позже можно добавить проверки на существование такого пользователя
         return new_user
 
-    async def delete(self, user_id: UUID) -> Union[UUID, None]:
-        query = update(User).where(and_(User.uuid == user_id, User.is_active == True)).values(
-            is_active=False).returning(User.uuid)
-        res=await self.db_session.execute(query)
+    async def delete(self, id: UUID) -> Union[UUID, None]:
+        query = update(User). \
+            where(and_(User.id == id, User.is_active == True)). \
+            values(is_active=False).returning(User.id)
+        res = await self.db_session.execute(query)
         deleted_user_id_row = res.fetchone()
         if deleted_user_id_row is not None:
             return deleted_user_id_row[0]
 
-    async def read(self):
-        pass
+    async def get_by_id(self, id: UUID) -> Union[User, None]:
+        query = select(User).where(User.id == id)
+        res = await self.db_session.execute(query)
+        user_row = res.fetchone()
+        if user_row is not None:
+            return user_row[0]
 
-    async def update(self):
-        pass
+    async def update(self, id: UUID, **kwargs) -> Union[UUID, None]:
+        query = update(User). \
+            where(and_(User.id == id, User.is_active == True)). \
+            values(kwargs). \
+            returning(User.id)
+        res = await self.db_session.execute(query)
+        update_user_id_row = res.fetchone()
+        if update_user_id_row is not None:
+            return update_user_id_row[0]
 
 
 class RoleDAL:  # User Data Access Layer создание, удаление и все остальные функции взаимодействия с пользователем

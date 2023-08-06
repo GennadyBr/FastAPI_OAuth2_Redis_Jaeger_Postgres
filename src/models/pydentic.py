@@ -2,15 +2,14 @@ import re
 import uuid
 from fastapi import HTTPException
 from pydantic import BaseModel, EmailStr, validator
+from typing import Optional
+
+from pydantic.types import constr
+
 
 ##################################
 # PYDENTIC BLOCK WITH API MODELS #
 ##################################
-
-LETTER_MATCH_PATTERN = re.compile(r"^[а-яА-Яa-zA-Z\-]+$")
-
-
-# лучше один раз создать регулярное выражение и потом вызывать через match, потому что делать регулярки каждый раз затратно для памяти
 
 class TunedModel(BaseModel):  # наследуется от BaseModel pydentic
     class Config:
@@ -21,7 +20,7 @@ class TunedModel(BaseModel):  # наследуется от BaseModel pydentic
 
 class ShowUser(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    uuid: uuid.UUID  # в алхимии другой UUID из алхимии
+    id: uuid.UUID  # в алхимии другой UUID из алхимии
     name: str
     surname: str
     login: str
@@ -32,7 +31,7 @@ class ShowUser(TunedModel):
 
 class ShowRole(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    uuid: uuid.UUID  # в алхимии другой UUID из алхимии
+    id: uuid.UUID  # в алхимии другой UUID из алхимии
     name: str
 
 
@@ -41,7 +40,7 @@ class ShowEntry(TunedModel):
     id: uuid.UUID
     user_id: uuid.UUID
     user_agent: str
-    date_time: str #потом поставлю datetime
+    date_time: str  # потом поставлю datetime
     refresh_token: str
     is_active: bool
 
@@ -80,6 +79,32 @@ class UserCreate(BaseModel):
 
 class DeleteUserResponse(BaseModel):
     deleted_user_id: uuid.UUID
+
+
+class UpdatedUserResponse(BaseModel):
+    updated_user_id: uuid.UUID
+
+
+class UpdateUserRequest(BaseModel):
+    name: Optional[constr(min_length=1)]
+    surname: Optional[constr(min_length=1)]
+    email: Optional[EmailStr]
+
+    @validator("name")
+    def validate_name(cls, value):
+        if not value.isalpha():
+            raise HTTPException(
+                status_code=422, detail="Name should contains only letters"
+            )
+        return value
+
+    @validator("surname")
+    def validate_surname(cls, value):
+        if not value.isalpha():
+            raise HTTPException(
+                status_code=422, detail="Surname should contains only letters"
+            )
+        return value
 
 
 class RoleCreate(BaseModel):
