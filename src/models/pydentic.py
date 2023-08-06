@@ -7,11 +7,6 @@ from pydantic import BaseModel, EmailStr, validator
 # PYDENTIC BLOCK WITH API MODELS #
 ##################################
 
-LETTER_MATCH_PATTERN = re.compile(r"^[а-яА-Яa-zA-Z\-]+$")
-
-
-# лучше один раз создать регулярное выражение и потом вызывать через match, потому что делать регулярки каждый раз затратно для памяти
-
 class TunedModel(BaseModel):  # наследуется от BaseModel pydentic
     class Config:
         """tells pydentic to conver even non dict obj to json"""
@@ -38,7 +33,7 @@ class ShowRole(TunedModel):
 
 class ShowEntry(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    id: uuid.UUID
+    uuid: uuid.UUID
     user_id: uuid.UUID
     user_agent: str
     date_time: str #потом поставлю datetime
@@ -48,7 +43,7 @@ class ShowEntry(TunedModel):
 
 class ShowUserRole(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    id: uuid.UUID
+    uuid: uuid.UUID
     user_id: uuid.UUID
     role_id: uuid.UUID
 
