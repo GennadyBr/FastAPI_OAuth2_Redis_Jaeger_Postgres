@@ -1,3 +1,10 @@
+#CRUD
+/src/models/
+/src/services/
+services/dals.py
+models/pydentic.py
+
+
 # Environments
 .env
 .venv
