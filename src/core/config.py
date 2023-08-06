@@ -1,11 +1,33 @@
 from logging import config as logging_config
 from pathlib import Path
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, AnyUrl
 
 from core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
+
+
+class UserDBSettings(BaseSettings):
+    name: str
+    user: str
+    password: str
+    port: int = 5432
+    service_name: str = 'db_users'
+
+    class Config:
+        env_prefix = 'pg_db_'
+
+    def _url(cls, asyncpg: bool = False) -> AnyUrl:
+        return f'postgresql{"+asyncpg" * asyncpg}://{cls.user}:{cls.password}@{cls.service_name}:{cls.port}/{cls.name}'
+    
+    @property
+    def url(cls) -> AnyUrl:
+        return cls._url()
+
+    @property
+    def async_url(cls) -> AnyUrl:
+        return cls._url(asyncpg=True)
 
 
 class AuthSettings(BaseSettings):
@@ -14,13 +36,12 @@ class AuthSettings(BaseSettings):
     log_lvl: str = 'DEBUG'
 
     class Config:
-        env_prefix = 'auth'
+        env_prefix = 'auth_'
 
 
 class RedisSettings(BaseSettings):
-    host: str = "redis"
-    # ??? 6379
-    port: int = 6380
+    host: str = 'redis'
+    port: int = 6379
     access_token_expire_sec: int = 60 * 5  # 5 минут
     refresh_token_expire_sec: int = 60 * 60  # 60 минут
 
@@ -30,3 +51,4 @@ class RedisSettings(BaseSettings):
 
 auth_settings = AuthSettings()
 redis_settings = RedisSettings()
+user_db_settings = UserDBSettings()
