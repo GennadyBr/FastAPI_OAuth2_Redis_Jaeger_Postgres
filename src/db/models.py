@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime
 
-
 from sqlalchemy import Column, Boolean, String, ForeignKey, DATETIME, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -13,8 +12,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # пайдентик на одной стороне, а алхимия на стороне приложения с базой данных
 
 Base = declarative_base()
-
-
 # что бы наследовать модели для общения с алхимией
 
 def default_time():

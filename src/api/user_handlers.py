@@ -1,22 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
+
 from typing import Union
 
-from models.pydentic import UserCreate, ShowUser, RoleCreate, ShowRole, DeleteUserResponse, UpdatedUserResponse, \
-    UpdatedUserResponse, UpdateUserRequest
+from models.user import UserCreate, ShowUser
+from models.base import DeleteResponse, UpdateResponse, UpdateRequest
 # Data Access Layer создание, удаление и все остальные функции взаимодействия с пользователем
-from services.dals import UserDAL, RoleDAL
+from crud.user import UserDAL
 
 from db.session import get_db
 
 user_router = APIRouter()  # инициализируем роутер для "/user"
-role_router = APIRouter()  # инициализируем роутер для "/role"
 
 
-########
-# USER #
-########
 async def _create_new_user(body: UserCreate, db) -> ShowUser:
     async with db as session:
         async with session.begin():
@@ -39,7 +36,7 @@ async def _create_new_user(body: UserCreate, db) -> ShowUser:
             )
 
 
-async def _delete_user(id, db) -> Union[UUID, None]:
+async def _delete_user(id, db) -> Union[UUID, str, None]:
     async with db as session:
         async with session.begin():
             user_dal = UserDAL(session)
@@ -62,7 +59,7 @@ async def _get_user_by_id(id, db) -> Union[ShowUser, None]:
     async with db as session:
         async with session.begin():
             user_dal = UserDAL(session)
-            user = await user_dal.get_by_id(
+            user = await user_dal.get(
                 id=id,
             )
             if user is not None:
@@ -82,52 +79,31 @@ async def create_user(body: UserCreate, db: AsyncSession = Depends(get_db)) -> S
     return await _create_new_user(body, db)
 
 
-@user_router.delete("/", response_model=DeleteUserResponse)
-async def delete_user(id: UUID, db: AsyncSession = Depends(get_db)) -> DeleteUserResponse:
-    deleted_user_id = await _delete_user(id, db)
-    if deleted_user_id is None:
-        raise HTTPException(status_code=404, detail=f"User with id{id} not found")
-    return DeleteUserResponse(deleted_user_id=deleted_user_id)
+@user_router.delete("/", response_model=DeleteResponse)
+async def delete_user(id: Union[str, UUID], db: AsyncSession = Depends(get_db)) -> DeleteResponse:
+    deleted_id = await _delete_user(id, db)
+    if deleted_id is None:
+        raise HTTPException(status_code=404, detail=f"User with id('{id}') not found")
+    return DeleteResponse(deleted_id=deleted_id)
 
 
 @user_router.get("/", response_model=ShowUser)
 async def get_user_by_id(id: UUID, db: AsyncSession = Depends(get_db)) -> ShowUser:
     user = await _get_user_by_id(id, db)
     if user is None:
-        raise HTTPException(status_code=404, detail=f"User with id {id} not found.")
+        raise HTTPException(status_code=404, detail=f"User with id('{id}') not found.")
     return user
 
 
-@user_router.patch("/", response_model=UpdatedUserResponse)
+@user_router.patch("/", response_model=UpdateResponse)
 async def update_user_by_id(
-        id: UUID, body: UpdateUserRequest, db: AsyncSession = Depends(get_db)
-) -> UpdatedUserResponse:
+        id: UUID, body: UpdateRequest, db: AsyncSession = Depends(get_db)
+) -> UpdateResponse:
     updated_user_params = body.dict(exclude_none=True)
     if updated_user_params == {}:
         raise HTTPException(status_code=422, detail="At least one parameter for user update info should be provided")
     user = await _get_user_by_id(id, db)
     if user is None:
-        raise HTTPException(status_code=404, detail=f"User with id {id} not found.")
-    updated_user_id = await _update_user(updated_user_params=updated_user_params, db=db, id=id)
-    return UpdatedUserResponse(updated_user_id=updated_user_id)
-
-
-########
-# ROLE #
-########
-async def _create_new_role(body: RoleCreate, db) -> ShowRole:
-    async with db as session:
-        async with session.begin():
-            role_dal = RoleDAL(session)
-            role = await role_dal.create(  # создаем роль в алхимии и получаем ее обратно
-                name=body.name
-            )
-            return ShowRole(
-                id=role.id,
-                name=role.name,
-            )
-
-
-@role_router.post("/", response_model=ShowRole)  # роутер пост запрос доступный через "/" а в mainrouter указано "/role"
-async def create_role(body: RoleCreate, db: AsyncSession = Depends(get_db)) -> ShowRole:
-    return await _create_new_role(body, db)
+        raise HTTPException(status_code=404, detail=f"User with id('{id}') not found.")
+    updated_id = await _update_user(updated_user_params=updated_user_params, db=db, id=id)
+    return UpdateResponse(updated_id=updated_id)
