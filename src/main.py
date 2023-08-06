@@ -3,6 +3,7 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi.routing import APIRouter
 
 from api.user_handlers import user_router
 from api.role_handlers import role_router
