@@ -37,13 +37,12 @@ class AuthSettings(BaseSettings):
     log_lvl: str = 'DEBUG'
 
     class Config:
-        env_prefix = 'auth'
+        env_prefix = 'auth_'
 
 
 class RedisSettings(BaseSettings):
-    host: str = "redis"
-    # ??? 6379
-    port: int = 6380
+    host: str = 'redis'
+    port: int = 6379
     access_token_expire_sec: int = 60 * 5  # 5 минут
     refresh_token_expire_sec: int = 60 * 60  # 60 минут
 

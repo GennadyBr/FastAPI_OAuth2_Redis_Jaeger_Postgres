@@ -1,7 +1,8 @@
 version: '3'
+
+
 services:
   db_users:
-    container_name: "db_users"
     image: postgres:13
     environment:
       POSTGRES_DB: ${PG_DB_NAME}
@@ -28,5 +29,3 @@ services:
 
 volumes:
   postgres_data:
-
-
