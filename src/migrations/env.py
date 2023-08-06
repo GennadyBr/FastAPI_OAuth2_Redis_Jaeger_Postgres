@@ -30,8 +30,7 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    return user_db_settings.SQLALCHEMY_DATABASE_URL
-
+    return user_db_settings.url
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

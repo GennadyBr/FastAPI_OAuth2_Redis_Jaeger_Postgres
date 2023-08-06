@@ -1,31 +1,33 @@
 from logging import config as logging_config
 from pathlib import Path
 
-from pydantic import BaseSettings
-from envparse import Env
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from pydantic import BaseSettings, AnyUrl
 
 from core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
-def user_db_settings():
-    pass
-
-env = Env()
-
-REAL_DATABASE_URL = env.str(
-    "REAL_DATABASE_URL",
-    default=f'postgresql+asyncpg://{os.getenv("PG_LOGIN")}:{os.getenv("PG_PWD")}@0.0.0.0:5432/postgres'
-) #connect string to database
-# postgresql+asyncpg - это драйвер подключения что бы алхимия синхронного подключалась
-
 
 class UserDBSettings(BaseSettings):
-    SQLALCHEMY_DATABASE_URL = f'postgresql://{os.getenv("PG_LOGIN")}:{os.getenv("PG_PWD")}@0.0.0.0:5432/postgres'
+    name: str
+    user: str
+    password: str
+    port: int = 5432
+    service_name: str = 'db_users'
+
+    class Config:
+        env_prefix = 'pg_db_'
+
+    def _url(cls, asyncpg: bool = False) -> AnyUrl:
+        return f'postgresql{"+asyncpg" * asyncpg}://{cls.user}:{cls.password}@{cls.service_name}:{cls.port}/{cls.name}'
+    
+    @property
+    def url(cls) -> AnyUrl:
+        return cls._url()
+
+    @property
+    def async_url(cls) -> AnyUrl:
+        return cls._url(asyncpg=True)
 
 
 

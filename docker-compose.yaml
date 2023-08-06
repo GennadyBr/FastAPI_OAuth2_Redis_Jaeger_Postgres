@@ -3,6 +3,10 @@ services:
   db_users:
     container_name: "db_users"
     image: postgres:13
+    environment:
+      POSTGRES_DB: ${PG_DB_NAME}
+      POSTGRES_USER: ${PG_DB_USER}
+      POSTGRES_PASSWORD: ${PG_DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
