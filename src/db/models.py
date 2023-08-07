@@ -17,7 +17,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
     surname = Column(String, nullable=False)
     login = Column(String, nullable=False, unique=True)
@@ -29,15 +29,15 @@ class User(Base):
 class Role(Base):
     __tablename__ = 'role'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False, unique=True)   # я подумал что название ролей должно быть уникальным
 
 
 class Entry(Base):
     __tablename__ = 'entry'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey(User.id), nullable=False)
+    uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(User.uuid), nullable=False)
     user_agent = Column(String)
     date_time = Column(DateTime, default=datetime.utcnow, nullable=False)
     refresh_token = Column(String)
@@ -47,6 +47,6 @@ class Entry(Base):
 class UserRole(Base):
     __tablename__ = 'user_role'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey(User.id), nullable=False)
-    role_id = Column(UUID(as_uuid=True), ForeignKey(Role.id), nullable=False)
+    uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(User.uuid), nullable=False)
+    role_id = Column(UUID(as_uuid=True), ForeignKey(Role.uuid), nullable=False)

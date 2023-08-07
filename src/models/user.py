@@ -12,7 +12,7 @@ from models.base import TunedModel
 
 class ShowUser(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    id: uuid.UUID  # в алхимии другой UUID из алхимии
+    uuid: uuid.UUID  # в алхимии другой UUID из алхимии
     name: str
     surname: str
     login: str

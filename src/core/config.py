@@ -9,11 +9,11 @@ logging_config.dictConfig(LOGGING)
 
 
 class UserDBSettings(BaseSettings):
-    name: str
-    user: str
-    password: str
+    name: str = 'postgres'
+    user: str = 'postgres'
+    password: str = 'postgres'
     port: int = 5432
-    service_name: str = 'db_users'
+    service_name: str = '0.0.0.0'
 
     class Config:
         env_prefix = 'pg_db_'

@@ -8,13 +8,13 @@ from models.base import TunedModel
 
 class ShowRole(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    id: uuid.UUID  # в алхимии другой UUID из алхимии
+    uuid: uuid.UUID  # в алхимии другой UUID из алхимии
     name: str
 
 
 class ShowUserRole(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    id: uuid.UUID
+    uuid: uuid.UUID
     user_id: uuid.UUID
     role_id: uuid.UUID
 

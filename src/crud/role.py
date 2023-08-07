@@ -29,21 +29,21 @@ class RoleDAL(
         # сюда позже можно добавить проверки на существование такой роли
         return new_role
 
-    async def delete(self, id: Union[str, UUID]) -> Union[UUID, None]:
-        role = await self.db_session.get(Role, id)
+    async def delete(self, uuid: Union[str, UUID]) -> Union[UUID, None]:
+        role = await self.db_session.get(Role, uuid)
         await self.db_session.delete(role)
         await self.db_session.commit()
-        return role.id
+        return role.uuid
 
-    async def get(self, id: UUID) -> Union[Role, None]:
-        query = select(Role).where(Role.id == id)
+    async def get(self, uuid: UUID) -> Union[Role, None]:
+        query = select(Role).where(Role.uuid == uuid)
         res = await self.db_session.execute(query)
         role_row = res.fetchone()
         if role_row is not None:
             return role_row[0]
 
-    async def update(self, id: UUID, **kwargs) -> Union[UUID, None]:
-        query = update(Role).where(Role.id == id).values(kwargs).returning(Role.id)
+    async def update(self, uuid: UUID, **kwargs) -> Union[UUID, None]:
+        query = update(Role).where(Role.uuid == uuid).values(kwargs).returning(Role.uuid)
         res = await self.db_session.execute(query)
         update_role_id_row = res.fetchone()
         if update_role_id_row is not None:

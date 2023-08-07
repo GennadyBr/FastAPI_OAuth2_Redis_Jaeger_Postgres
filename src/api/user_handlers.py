@@ -26,7 +26,7 @@ async def _create_new_user(body: UserCreate, db) -> ShowUser:
                 password=body.password
             )
             return ShowUser(
-                id=user.id,
+                uuid=user.uuid,
                 name=user.name,
                 surname=user.surname,
                 login=user.login,
@@ -36,35 +36,35 @@ async def _create_new_user(body: UserCreate, db) -> ShowUser:
             )
 
 
-async def _delete_user(id, db) -> Union[UUID, str, None]:
+async def _delete_user(uuid, db) -> Union[UUID, str, None]:
     async with db as session:
         async with session.begin():
             user_dal = UserDAL(session)
-            deleted_user_id = await user_dal.delete(id=id)
+            deleted_user_id = await user_dal.delete(uuid=uuid)
             return deleted_user_id
 
 
-async def _update_user(updated_user_params: dict, id: UUID, db) -> Union[UUID, None]:
+async def _update_user(updated_user_params: dict, uuid: UUID, db) -> Union[UUID, None]:
     async with db as session:
         async with session.begin():
             user_dal = UserDAL(session)
             updated_user_id = await user_dal.update(
-                id=id,
+                uuid=uuid,
                 **updated_user_params
             )
             return updated_user_id
 
 
-async def _get_user_by_id(id, db) -> Union[ShowUser, None]:
+async def _get_user_by_id(uuid, db) -> Union[ShowUser, None]:
     async with db as session:
         async with session.begin():
             user_dal = UserDAL(session)
             user = await user_dal.get(
-                id=id,
+                uuid=uuid,
             )
             if user is not None:
                 return ShowUser(
-                    id=user.id,
+                    uuid=user.uuid,
                     name=user.name,
                     surname=user.surname,
                     login=user.login,
@@ -80,30 +80,30 @@ async def create_user(body: UserCreate, db: AsyncSession = Depends(get_db)) -> S
 
 
 @user_router.delete("/", response_model=DeleteResponse)
-async def delete_user(id: Union[str, UUID], db: AsyncSession = Depends(get_db)) -> DeleteResponse:
-    deleted_id = await _delete_user(id, db)
+async def delete_user(uuid: Union[str, UUID], db: AsyncSession = Depends(get_db)) -> DeleteResponse:
+    deleted_id = await _delete_user(uuid, db)
     if deleted_id is None:
-        raise HTTPException(status_code=404, detail=f"User with id('{id}') not found")
+        raise HTTPException(status_code=404, detail=f"User with id('{uuid}') not found")
     return DeleteResponse(deleted_id=deleted_id)
 
 
 @user_router.get("/", response_model=ShowUser)
-async def get_user_by_id(id: UUID, db: AsyncSession = Depends(get_db)) -> ShowUser:
-    user = await _get_user_by_id(id, db)
+async def get_user_by_id(uuid: UUID, db: AsyncSession = Depends(get_db)) -> ShowUser:
+    user = await _get_user_by_id(uuid, db)
     if user is None:
-        raise HTTPException(status_code=404, detail=f"User with id('{id}') not found.")
+        raise HTTPException(status_code=404, detail=f"User with id('{uuid}') not found.")
     return user
 
 
 @user_router.patch("/", response_model=UpdateResponse)
 async def update_user_by_id(
-        id: UUID, body: UpdateRequest, db: AsyncSession = Depends(get_db)
+        uuid: UUID, body: UpdateRequest, db: AsyncSession = Depends(get_db)
 ) -> UpdateResponse:
     updated_user_params = body.dict(exclude_none=True)
     if updated_user_params == {}:
         raise HTTPException(status_code=422, detail="At least one parameter for user update info should be provided")
-    user = await _get_user_by_id(id, db)
+    user = await _get_user_by_id(uuid, db)
     if user is None:
-        raise HTTPException(status_code=404, detail=f"User with id('{id}') not found.")
-    updated_id = await _update_user(updated_user_params=updated_user_params, db=db, id=id)
+        raise HTTPException(status_code=404, detail=f"User with id('{uuid}') not found.")
+    updated_id = await _update_user(updated_user_params=updated_user_params, db=db, uuid=uuid)
     return UpdateResponse(updated_id=updated_id)

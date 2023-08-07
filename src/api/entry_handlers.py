@@ -24,7 +24,7 @@ async def _create_new_entry(body: EntryCreate, db) -> ShowEntry:
                 refresh_token=body.refresh_token,
             )
             return ShowEntry(
-                id=entry.id,
+                uuid=entry.uuid,
                 user_id=entry.user_id,
                 user_agent=entry.user_agent,
                 date_time=entry.date_time,
@@ -33,35 +33,35 @@ async def _create_new_entry(body: EntryCreate, db) -> ShowEntry:
             )
 
 
-async def _delete_entry(id, db) -> Union[UUID, str, None]:
+async def _delete_entry(uuid, db) -> Union[UUID, str, None]:
     async with db as session:
         async with session.begin():
             entry_dal = EntryDAL(session)
-            deleted_entry_id = await entry_dal.delete(id=id)
+            deleted_entry_id = await entry_dal.delete(uuid=uuid)
             return deleted_entry_id
 
 
-async def _update_entry(updated_entry_params: dict, id: UUID, db) -> Union[UUID, None]:
+async def _update_entry(updated_entry_params: dict, uuid: UUID, db) -> Union[UUID, None]:
     async with db as session:
         async with session.begin():
             entry_dal = EntryDAL(session)
             updated_entry_id = await entry_dal.update(
-                id=id,
+                uuid=uuid,
                 **updated_entry_params
             )
             return updated_entry_id
 
 
-async def _get_entry_by_id(id, db) -> Union[ShowEntry, None]:
+async def _get_entry_by_id(uuid, db) -> Union[ShowEntry, None]:
     async with db as session:
         async with session.begin():
             entry_dal = EntryDAL(session)
             entry = await entry_dal.get(
-                id=id,
+                uuid=uuid,
             )
             if entry is not None:
                 return ShowEntry(
-                    id=entry.id,
+                    uuid=entry.uuid,
                     user_id=entry.user_id,
                     user_agent=entry.user_agent,
                     date_time=entry.date_time,
@@ -76,30 +76,30 @@ async def create_entry(body: EntryCreate, db: AsyncSession = Depends(get_db)) ->
 
 
 @entry_router.delete("/", response_model=DeleteResponse)
-async def delete_entry(id: Union[str, UUID], db: AsyncSession = Depends(get_db)) -> DeleteResponse:
-    deleted_id = await _delete_entry(id, db)
+async def delete_entry(uuid: Union[str, UUID], db: AsyncSession = Depends(get_db)) -> DeleteResponse:
+    deleted_id = await _delete_entry(uuid, db)
     if deleted_id is None:
-        raise HTTPException(status_code=404, detail=f"Entry with id('{id}') not found")
+        raise HTTPException(status_code=404, detail=f"Entry with id('{uuid}') not found")
     return DeleteResponse(deleted_id=deleted_id)
 
 
 @entry_router.get("/", response_model=ShowEntry)
-async def get_entry_by_id(id: UUID, db: AsyncSession = Depends(get_db)) -> ShowEntry:
-    entry = await _get_entry_by_id(id, db)
+async def get_entry_by_id(uuid: UUID, db: AsyncSession = Depends(get_db)) -> ShowEntry:
+    entry = await _get_entry_by_id(uuid, db)
     if entry is None:
-        raise HTTPException(status_code=404, detail=f"Entry with id('{id}') not found.")
+        raise HTTPException(status_code=404, detail=f"Entry with id('{uuid}') not found.")
     return entry
 
 
 @entry_router.patch("/", response_model=UpdateResponse)
 async def update_entry_by_id(
-        id: UUID, body: UpdateRequest, db: AsyncSession = Depends(get_db)
+        uuid: UUID, body: UpdateRequest, db: AsyncSession = Depends(get_db)
 ) -> UpdateResponse:
     updated_entry_params = body.dict(exclude_none=True)
     if updated_entry_params == {}:
         raise HTTPException(status_code=422, detail="At least one parameter for entry update info should be provided")
-    entry = await _get_entry_by_id(id, db)
+    entry = await _get_entry_by_id(uuid, db)
     if entry is None:
-        raise HTTPException(status_code=404, detail=f"Entry with id('{id}') not found.")
-    updated_id = await _update_entry(updated_entry_params=updated_entry_params, db=db, id=id)
+        raise HTTPException(status_code=404, detail=f"Entry with id('{uuid}') not found.")
+    updated_id = await _update_entry(updated_entry_params=updated_entry_params, db=db, uuid=uuid)
     return UpdateResponse(updated_id=updated_id)

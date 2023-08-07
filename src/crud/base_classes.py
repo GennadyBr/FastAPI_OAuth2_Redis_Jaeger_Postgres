@@ -13,14 +13,14 @@ class CrudBase(ABC):
         """создание записи в таблице"""
 
     @abstractmethod
-    async def delete(self, id: Union[str, UUID]) -> Any:
+    async def delete(self, uuid: Union[str, UUID]) -> Any:
         """удаление записи в таблице"""
 
     @abstractmethod
-    async def get(self, id: UUID) -> Any:
+    async def get(self, uuid: UUID) -> Any:
         """получение записи из таблице"""
 
 
     @abstractmethod
-    async def update(self, id: UUID, **kwargs) -> Any:
+    async def update(self, uuid: UUID, **kwargs) -> Any:
         """редактирование записи в таблице"""

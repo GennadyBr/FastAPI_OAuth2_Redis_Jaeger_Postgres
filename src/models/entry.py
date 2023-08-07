@@ -8,7 +8,7 @@ from models.base import TunedModel
 
 class ShowEntry(TunedModel):
     """это класс ответа для пользователя, поэтому JSON TunedModel"""
-    id: uuid.UUID
+    uuid: uuid.UUID
     user_id: uuid.UUID
     user_agent: str
     date_time: datetime
@@ -18,7 +18,7 @@ class ShowEntry(TunedModel):
 
 class EntryCreate(BaseModel):
     """это класс обработки входящего запроса поэтому не надо JSON TunedModel"""
-    # id: uuid.UUID
+    # uuid: uuid.UUID
     user_id: uuid.UUID
     user_agent: str
     # date_time: datetime

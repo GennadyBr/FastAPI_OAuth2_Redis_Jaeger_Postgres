@@ -35,27 +35,27 @@ class UserDAL(
         # сюда позже можно добавить проверки на существование такого пользователя
         return new_user
 
-    async def delete(self, id: Union[str, UUID]) -> Union[UUID, None]:
+    async def delete(self, uuid: Union[str, UUID]) -> Union[UUID, None]:
         query = update(User). \
-            where(and_(User.id == id, User.is_active == True)). \
-            values(is_active=False).returning(User.id)
+            where(and_(User.uuid == uuid, User.is_active == True)). \
+            values(is_active=False).returning(User.uuid)
         res = await self.db_session.execute(query)
         deleted_user_id_row = res.fetchone()
         if deleted_user_id_row is not None:
             return deleted_user_id_row[0]
 
-    async def get(self, id: UUID) -> Union[User, None]:
-        query = select(User).where(User.id == id)
+    async def get(self, uuid: UUID) -> Union[User, None]:
+        query = select(User).where(User.uuid == uuid)
         res = await self.db_session.execute(query)
         user_row = res.fetchone()
         if user_row is not None:
             return user_row[0]
 
-    async def update(self, id: UUID, **kwargs) -> Union[UUID, None]:
+    async def update(self, uuid: UUID, **kwargs) -> Union[UUID, None]:
         query = update(User). \
-            where(and_(User.id == id, User.is_active == True)). \
+            where(and_(User.uuid == uuid, User.is_active == True)). \
             values(kwargs). \
-            returning(User.id)
+            returning(User.uuid)
         res = await self.db_session.execute(query)
         update_user_id_row = res.fetchone()
         if update_user_id_row is not None:
