@@ -5,8 +5,8 @@ from datetime import datetime
 from uuid import UUID
 from typing import Union
 
-from db.models import Entry
-from crud.base_classes import CrudBase
+from src.db.models import Entry
+from src.crud.base_classes import CrudBase
 
 
 ###########################################################
@@ -57,3 +57,10 @@ class EntryDAL(
         update_entry_id_row = res.fetchone()
         if update_entry_id_row is not None:
             return update_entry_id_row[0]
+
+    async def get_by_user_id(self, user_id: UUID) -> Union[Entry, None]:
+        query = select(Entry).where(Entry.user_id == user_id)
+        res = await self.db_session.execute(query)
+        entry_list = res.fetchall()
+        if entry_list is not None:
+            return entry_list
