@@ -13,8 +13,7 @@ from crud.base_classes import CrudBase
 ###########################################################
 
 
-class RoleDAL(
-    CrudBase):  # Role Data Access Layer создание, удаление и все остальные функции взаимодействия с пользователем
+class RoleDAL(CrudBase):
     """Data Access Layer for operation role CRUD"""
 
     def __init__(self, db_session: AsyncSession):
@@ -48,7 +47,7 @@ class RoleDAL(
         await self.db_session.commit()
         if update_role_id_row is not None:
             return update_role_id_row[0]
-        
+
     async def get_by_user_id(self, user_id: UUID) -> Optional[List[Role]]:
         query = select(Role). \
             join(UserRole, Role.uuid == UserRole.role_id). \
@@ -57,3 +56,22 @@ class RoleDAL(
         res = await self.db_session.execute(query)
         role_rows = res.scalars().fetchall()
         return role_rows
+
+    async def get_all(self) -> Union[List[Role], None]:
+        query = select(Role)
+        res = await self.db_session.execute(query)
+        role_rows = res.fetchall()
+        if role_rows:
+            return [row[0] for row in role_rows]
+
+    async def delete_by_user_id_and_role_id(self, user_id: UUID, role_id: UUID) -> Optional[List[Role]]:
+        query = select(UserRole). \
+            join(Role, Role.uuid == UserRole.role_id). \
+            join(User, UserRole.user_id == User.uuid). \
+            where(UserRole.user_id == user_id).where(Role.uuid == role_id)
+        res = await self.db_session.execute(query)
+        role_rows = res.fetchone()
+        if role_rows:
+            user_role = await self.db_session.get(UserRole, role_rows[0].uuid)
+            await self.db_session.delete(user_role)
+            await self.db_session.commit()

@@ -1,8 +1,8 @@
-from sqlalchemy import update, and_, select
+from sqlalchemy import update, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from uuid import UUID
-from typing import Union
+from typing import List, Union
 
 from db.models import UserRole
 from crud.base_classes import CrudBase
@@ -12,8 +12,7 @@ from crud.base_classes import CrudBase
 # BLOCK FOR INTERACTION WITH DATABASE IN BUSINESS CONTEXT #
 ###########################################################
 
-class UserRoleDAL(
-    CrudBase):  # UserRole Data Access Layer создание, удаление и все остальные функции взаимодействия с пользователем
+class UserRoleDAL(CrudBase):
     """Data Access Layer for operation user_role CRUD"""
 
     def __init__(self, db_session: AsyncSession):
@@ -27,12 +26,12 @@ class UserRoleDAL(
             role_id=role_id
         )
         self.db_session.add(new_user_role)
-        await self.db_session.flush()
+        await self.db_session.commit()
         # сюда позже можно добавить проверки на существование такого пользователя
         return new_user_role
 
     # удаление записи по uuid
-    async def delete_dy_id(self, uuid: Union[str, UUID]) -> Union[UUID, None]:
+    async def delete(self, uuid: Union[str, UUID]) -> Union[UUID, None]:
         user_role = await self.db_session.get(UserRole, uuid)
         await self.db_session.delete(user_role)
         await self.db_session.commit()
@@ -52,20 +51,22 @@ class UserRoleDAL(
         await self.db_session.commit()
         return user_role.uuid
 
-    async def get_by_id(self, uuid: UUID) -> Union[UserRole, None]:
+    async def get(self, uuid: UUID) -> Union[UserRole, None]:
         query = select(UserRole).where(UserRole.uuid == uuid)
         res = await self.db_session.execute(query)
         user_role_row = res.fetchone()
         if user_role_row is not None:
             return user_role_row[0]
 
-    async def get_by_user_id(self, user_id: UUID) -> Union[UserRole, None]:
+    async def get_by_user_id(self, user_id: UUID) -> List[UserRole] | None:
         query = select(UserRole).where(UserRole.user_id == user_id)
         res = await self.db_session.execute(query)
-        user_role_row = res.fetchone()
-        if user_role_row is not None:
-            return user_role_row[0]
+        user_role_rows = res.fetchall()
+        if user_role_rows is not None:
+            return [row[0] for row in user_role_rows]
+
     async def get_by_role_id(self, role_id: UUID) -> Union[UserRole, None]:
+        # не будет работать в таком виде. Но пока нигде не используется
         query = select(UserRole).where(UserRole.role_id == role_id)
         res = await self.db_session.execute(query)
         user_role_row = res.fetchone()
