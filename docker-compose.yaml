@@ -32,6 +32,5 @@ services:
       - redis_token
       - db_users
 
-
 volumes:
   postgres_data:
