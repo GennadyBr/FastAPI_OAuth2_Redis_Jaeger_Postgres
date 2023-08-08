@@ -4,48 +4,46 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from models.role import RoleResponse
+from models.role import NewRoleToUser, RolePostUpdate, RoleResponse
 from services.role import RoleService, get_role_service
 
 router = APIRouter()
 
 
 @router.post(
-    '',
+    '/new',
     response_model=RoleResponse,
     response_model_include={"id", "name"},
     summary="Post request for new role creation",
     description="Creates a new role and returns a new role object",
     response_description="Uuid, name of the role"
 )
-async def create_new_role(role_name: str, role_service: RoleService = Depends(get_role_service)):
-    new_role = await role_service.create_role(role_name)
+async def create_new_role(role_body: RolePostUpdate, role_service: RoleService = Depends(get_role_service)):
+    new_role = await role_service.create_role(role_body.name)
     if not new_role:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Role is not created')
-    # new_role = RoleResponse(**new_role)
     return new_role
 
 
-@router.put(
-    '',
+@router.patch(
+    '/update',
     response_model=RoleResponse,
     response_model_include={"id", "name"},
-    summary="Put request for updating existed role",
+    summary="Patch request for updating existed role",
     description="Updates an existed role and returns a new role object",
     response_description="Uuid, name of the role"
 )
 async def update_existed_role(role_id: uuid.UUID,
-                              new_role_name: str,
+                              role_body: RolePostUpdate,
                               role_service: RoleService = Depends(get_role_service)):
-    new_role = await role_service.update_role(role_id, new_role_name)
+    new_role = await role_service.update_role(role_id, role_body.name)
     if not new_role:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Role is not updated')
-    # new_role = RoleResponse(**new_role)
     return new_role
 
 
 @router.get(
-    '',
+    '/',
     response_model=RoleResponse,
     response_model_include={"id", "name"},
     summary="Get request for existed role",
@@ -57,12 +55,11 @@ async def get_existed_role(role_id: uuid.UUID,
     new_role = await role_service.read_role(role_id)
     if not new_role:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Role is not found')
-    # new_role = RoleResponse(**new_role)
     return new_role
 
 
 @router.delete(
-    '',
+    '/',
     response_model=bool,
     summary="Delete request for existed role",
     description="Deletes an existed role and returns a bool object",
@@ -73,12 +70,11 @@ async def delete_existed_role(role_id: uuid.UUID,
     result = await role_service.delete_role(role_id)
     if not result:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Role is not found for deleting')
-    # new_role = RoleResponse(**new_role)
     return bool(result)
 
 
 @router.get(
-    '',
+    '/user',
     response_model=List[RoleResponse],
     response_model_include={"id", "name"},
     summary="Get user's roles",
@@ -90,39 +86,36 @@ async def get_user_role(user_id: uuid.UUID,
     roles = await role_service.get_user_access_area(user_id)
     if not roles:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Roles are not found')
-    # new_role = RoleResponse(**new_role)
     return roles
 
 
 @router.post(
-    '',
-    # response_model=UserRolesResponse,
+    '/role-to-user',
+    response_model=bool,
     response_model_include={"id", "username", "roles"},
     summary="Add a new role to user",
     description="Add a new role to user",
     response_description="User object with roles info"
 )
-async def set_role_to_user(user_id: uuid.UUID, role_id: uuid.UUID,
+async def set_role_to_user(role_body: NewRoleToUser,
                            role_service: RoleService = Depends(get_role_service)):
-    updated_user = await role_service.set_role_to_user(user_id, role_id)
+    updated_user = await role_service.set_role_to_user(role_body.user_id, role_body.role_id)
     if not updated_user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Roles are not found')
-    # new_role = RoleResponse(**new_role)
     return updated_user
 
 
 @router.delete(
-    '',
-    # response_model=UserRolesResponse,
+    '/role-to-user',
+    # response_model=bool,
     response_model_include={"id", "username", "roles"},
     summary="Remove a role from user",
     description="Removes a role from user",
     response_description="User object with roles info"
 )
-async def remove_role_from_user(user_id: uuid.UUID, role_id: uuid.UUID,
+async def remove_role_from_user(role_body: NewRoleToUser,
                                 role_service: RoleService = Depends(get_role_service)):
-    updated_user = await role_service.set_role_to_user(user_id, role_id)
+    updated_user = await role_service.remove_role_from_user(role_body.user_id, role_body.role_id)
     if not updated_user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Roles are not found')
-    # new_role = RoleResponse(**new_role)
     return updated_user
