@@ -22,5 +22,8 @@ python-multipart==0.0.5
 python-dotenv==1.0.0
 bcrypt==4.0.1
 greenlet==2.0.2
-sentry-sdk[fastapi]
+sentry-sdk[fastapi]==1.29.2
 starlette-exporter==0.15.1
+backoff==2.2.1
+redis==4.6.0
+orjson==3.9.3
