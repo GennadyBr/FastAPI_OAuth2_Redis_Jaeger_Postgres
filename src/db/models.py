@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, Boolean, String, ForeignKey, DateTime
+from sqlalchemy import Column, Boolean, String, ForeignKey, DATETIME, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base
 
@@ -30,7 +30,7 @@ class Role(Base):
     __tablename__ = 'role'
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False, unique=True)   # я подумал что название ролей должно быть уникальным
 
 
 class Entry(Base):
