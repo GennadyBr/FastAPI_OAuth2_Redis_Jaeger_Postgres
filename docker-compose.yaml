@@ -30,15 +30,5 @@ services:
       - db_users
 
 
-  nginx:
-    image: nginx:1.25.1-alpine
-    depends_on:
-      - auth
-    ports:
-      - "${NGINX_PORT}:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx:/etc/nginx/conf.d:ro
-
 volumes:
   postgres_data:
