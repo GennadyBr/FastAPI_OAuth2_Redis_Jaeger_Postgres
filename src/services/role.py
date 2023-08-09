@@ -115,10 +115,7 @@ class RoleService(RoleCRUD, RoleServiceBase):
             async with session.begin():
                 role_dal = RoleDAL(session)
                 await role_dal.delete_by_user_id_and_role_id(user_id, role_id)
-                res = await role_dal.delete_by_user_id_and_role_id(user_id, role_id)
-                if res is None:
-                    return True
-                return False
+                return True
 
 
 @lru_cache()
