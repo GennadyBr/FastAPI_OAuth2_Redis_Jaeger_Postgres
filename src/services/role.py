@@ -8,8 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from crud.role import RoleDAL
 from crud.user_role import UserRoleDAL
-from db.abstract import AbstractCache
-from db.redis import get_cache
 from db.session import get_db
 from models.role import RoleResponse
 
@@ -52,9 +50,8 @@ class RoleServiceBase(ABC):
 
 class RoleService(RoleCRUD, RoleServiceBase):
 
-    def __init__(self, db: AsyncSession, cache: AbstractCache):
+    def __init__(self, db: AsyncSession):
         self.db = db
-        self.cache = cache
 
     async def create_role(self, role_name: str) -> Optional[RoleResponse]:
         async with self.db as session:
@@ -119,6 +116,5 @@ class RoleService(RoleCRUD, RoleServiceBase):
 
 
 @lru_cache()
-def get_role_service(db: AsyncSession = Depends(get_db),
-                     cache: AbstractCache = Depends(get_cache)) -> RoleService:
-    return RoleService(db=db, cache=cache)
+def get_role_service(db: AsyncSession = Depends(get_db)) -> RoleService:
+    return RoleService(db=db)
