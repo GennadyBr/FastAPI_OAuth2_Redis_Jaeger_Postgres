@@ -4,6 +4,7 @@ from psycopg2 import Error
 import uuid
 import os
 from dotenv import load_dotenv
+import bcrypt
 
 load_dotenv()
 
@@ -25,10 +26,14 @@ try:
                                   database="postgres") as connection:
 
       cursor = connection.cursor()
+
+      salt = bcrypt.gensalt()
+      pwd_hash = bcrypt.hashpw(args.password.encode('utf-8'), salt)
+
       # добавление пользователя в таблицу user
       query = """ INSERT INTO users (uuid, name, surname, login, email, is_active, password) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
       user_id = str(uuid.uuid4())
-      params = (user_id, args.name, args.surname, args.login, args.email, True, args.password)
+      params = (user_id, args.name, args.surname, args.login, args.email, True, pwd_hash)
       cursor.execute(query, params)
 
       # получение ID super_user из базы role
