@@ -8,8 +8,6 @@ Create Date: 2023-08-11 11:38:05.505805
 import uuid
 
 from alembic import op
-import sqlalchemy as sa
-
 
 # revision identifiers, used by Alembic.
 revision = '087e0215143f'
@@ -22,13 +20,18 @@ def upgrade() -> None:
     from sqlalchemy.sql import insert, table, column
     from sqlalchemy import orm
 
-    role = table('role', column('name'), column('uuid'))
+    # перечисляем таблицы с полями, которые будем заполнять
+    role = table('role', column('uuid'), column('name'))
+
+    # создаем коннекшн к базе данных
     bind = op.get_bind()
     session = orm.Session(bind=bind)
 
-    data = {"name":"superuser", "uuid":uuid.uuid4(),}
-    ret = session.execute(insert(role).values(data))
+    # создаем РОЛЬ супер пользователя
+    data = {"uuid": uuid.uuid4(), "name": "super_user", }
+    session.execute(insert(role).values(data))
     session.commit()
+    session.close()
 
 def downgrade() -> None:
     pass
