@@ -8,8 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.token import TokenDBBase, get_token_db
 from db.models import User as DBUser, Entry as DBEntry
-from models import user as user_models, entry as entry_models
-# from crud.base_classes import CrudBase
+from models import user as user_models
 from crud import user as user_dal, role as role_dal, entry as entry_dal
 from utils.token_manager import TokenManagerBase, get_token_manager
 from db.session import get_db
@@ -93,16 +92,10 @@ class AuthService(AuthServiceBase, HashManagerBase):
                  token_db: TokenDBBase, 
                  token_manager: TokenManagerBase, 
                  user_db_session: AsyncSession,
-                #  user_crud: UserCRUDBase,
-                #  entry_crud: EntryCRUDBase,
-                #  role_crud: RoleCRUDBase,
                  ) -> None:
         self.token_db = token_db
         self.token_manager = token_manager
         self.user_db_session = user_db_session
-        # self.user_crud = user_crud.UserDAL(user_db_session)
-        # self.entry_crud = entry_crud.EntryDAL(user_db_session)
-        # self.role_crud = role_crud.RoleDAL(user_db_session)
 
     def hash_pwd(self, pwd: str) -> str:
         salt = bcrypt.gensalt()
@@ -276,10 +269,5 @@ class AuthService(AuthServiceBase, HashManagerBase):
 def get_auth_service(token_db: TokenDBBase = Depends(get_token_db),
                      token_manager: TokenManagerBase = Depends(get_token_manager),
                      user_db_session = Depends(get_db),
-                    #  user_crud: UserCRUDBase = Depends(get_user_crud),
-                    #  entry_crud: EntryCRUDBase = Depends(get_entry_crud),
-                    #  role_crud: RoleCRUDBase = Depends(get_role_crud),
                      ) -> AuthService:
-    return AuthService(token_db, token_manager, user_db_session,
-                        # user_crud, entry_crud, role_crud
-                        )
+    return AuthService(token_db, token_manager, user_db_session)
