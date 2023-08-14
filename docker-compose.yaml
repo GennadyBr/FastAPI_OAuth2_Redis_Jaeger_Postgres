@@ -23,9 +23,12 @@ services:
     build: .
     env_file:
       - .env
+    ports:
+      - "8081:8081"
     depends_on:
       - redis_token
       - db_users
+
 
 volumes:
   postgres_data:
