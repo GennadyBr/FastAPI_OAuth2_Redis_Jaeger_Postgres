@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.token import TokenDBBase, get_token_db
 from db.models import User as DBUser, Entry as DBEntry
-from models import user as user_models, role as role_models, entry as entry_models
+from models import user as user_models, entry as entry_models
 # from crud.base_classes import CrudBase
 from crud import user as user_dal, role as role_dal, entry as entry_dal
 from utils.token_manager import TokenManagerBase, get_token_manager
@@ -168,7 +168,6 @@ class AuthService(AuthServiceBase, HashManagerBase):
         exist_session = await entry_crud.get_by_user_agent(user_agent, only_active=True)
         
         if exist_session:
-            print(exist_session.uuid, exist_session.refresh_token)
             await self._close_session(exist_session.refresh_token)
 
         access_token, refresh_token = await self._open_session(user, user_agent)
@@ -227,7 +226,6 @@ class AuthService(AuthServiceBase, HashManagerBase):
     async def user_data(self, access_token: str) -> DBUser:
         user_crud = user_dal.UserDAL(self.user_db_session)
         token_data = await self.token_manager.get_data_from_access_token(access_token)
-        print(token_data)
         user = await user_crud.get(token_data.sub)
         return user
 
