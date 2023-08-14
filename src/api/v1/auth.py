@@ -75,10 +75,11 @@ async def user_role(token: str = Depends(verify_access_token),
 @router.get('/logout')
 async def logout(response: Response,
                  access_token: str = Depends(verify_access_token),
+                 refresh_token: Annotated[str, Cookie(include_in_schema=False)] = None,
                  user_agent: str = Header(include_in_schema=False),
                  auth_service: AuthServiceBase = Depends(get_auth_service),
                  ) -> None:
-    await auth_service.logout(access_token, user_agent)
+    await auth_service.logout(access_token, refresh_token, user_agent)
     response.delete_cookie(token_settings.refresh_token_cookie_name)
 
 @router.get('/logout_all')

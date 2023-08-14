@@ -191,15 +191,18 @@ class AuthService(AuthServiceBase, HashManagerBase):
         await entry_crud.delete(refresh_token_data.session_id) # db.close_session(refresh_token_data.session_id)
         await self.token_db.put(refresh_token, refresh_token_data.sub, refresh_token_data.left_time)
     
-    async def logout(self, access_token: str, user_agent: str) -> None:
+    async def logout(self, access_token: str, refresh_token: str, user_agent: str = None) -> None:
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         access_token_data = await self.token_manager.get_data_from_access_token(access_token)
         user_id = access_token_data.sub
         # добавить в redis истекшие токены
         await self.token_db.put(access_token, user_id, access_token_data.left_time)
 
-        session = await entry_crud.get_by_user_agent(user_agent, only_active=True)
-        await self._close_session(session.refresh_token)
+        if refresh_token is None:
+            session = await entry_crud.get_by_user_agent(user_agent, only_active=True)
+            await self._close_session(session.refresh_token)
+        else:
+            await self._close_session(refresh_token)
 
     async def logout_all(self, access_token: str) -> None:
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
