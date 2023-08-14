@@ -12,7 +12,8 @@ from db.session import get_db
 from models.role import RoleResponse
 
 
-class RoleCRUD(ABC):
+class RoleServiceBase(ABC):
+
     @abstractmethod
     async def create_role(self, role_name: str) -> Optional[RoleResponse]:
         """Create new role in db"""
@@ -32,9 +33,6 @@ class RoleCRUD(ABC):
     async def delete_role(self, role_id: uuid.UUID) -> bool:
         """Delete role from db"""
 
-
-class RoleServiceBase(ABC):
-
     @abstractmethod
     async def get_user_access_area(self, user_id: uuid.UUID) -> RoleResponse:
         """Get access area for user by its id"""
@@ -48,7 +46,7 @@ class RoleServiceBase(ABC):
         """Remove role from users roles"""
 
 
-class RoleService(RoleCRUD, RoleServiceBase):
+class RoleService(RoleServiceBase):
 
     def __init__(self, db: AsyncSession):
         self.db = db
