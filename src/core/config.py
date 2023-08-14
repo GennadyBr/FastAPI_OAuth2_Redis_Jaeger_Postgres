@@ -19,7 +19,7 @@ class UserDBSettings(BaseSettings):
     user: str
     password: SecretStr
     port: int = 5432
-    service_name: str = '0.0.0.0'
+    service_name: str = 'db_users'
 
     class Config:
         env_prefix = 'pg_db_'
