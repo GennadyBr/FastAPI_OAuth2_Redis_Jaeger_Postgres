@@ -1,6 +1,7 @@
 from logging import config as logging_config
+from pathlib import Path
 
-from pydantic import BaseSettings, AnyUrl, SecretStr
+from pydantic import BaseSettings, AnyUrl, Field, SecretStr
 
 from core.logger import LOGGING
 
@@ -18,7 +19,7 @@ class UserDBSettings(BaseSettings):
     user: str
     password: SecretStr
     port: int = 5432
-    service_name: str = '0.0.0.0'
+    service_name: str = 'db_users'
 
     class Config:
         env_prefix = 'pg_db_'
@@ -47,7 +48,6 @@ class TokenSettings(BaseSettings):
     class Config:
         env_prefix = 'token_'
 
-
 class RedisSettings(BaseSettings):
     host: str = 'redis_token'
     port: int = 6379
@@ -55,7 +55,6 @@ class RedisSettings(BaseSettings):
 
     class Config:
         env_prefix = 'redis_'
-
 
 app_settings = APPSettings()
 token_settings = TokenSettings()

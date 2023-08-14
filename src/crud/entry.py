@@ -1,7 +1,7 @@
 from uuid import UUID
 from typing import Union, Optional, List
 
-from sqlalchemy import update, and_, select
+from sqlalchemy import update, tuple_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 
@@ -49,7 +49,7 @@ class EntryDAL(
         if entry_row is not None:
             return entry_row[0]
 
-    async def update(self, uuid: UUID, **kwargs) -> Union[UUID, None]:
+    async def update(self, id: UUID, **kwargs) -> Union[UUID, None]:
         query = update(Entry). \
             where(Entry.uuid == id). \
             values(kwargs). \
@@ -65,7 +65,7 @@ class EntryDAL(
         if only_active:
             query = query.where(Entry.is_active == True)
         if unique:
-            query = query.distinct(Entry.user_agent)
+            query = query.distinct(tuple_(Entry.user_agent, Entry.is_active))
         res = await self.db_session.execute(query)
         entries = res.scalars().fetchall()
         return entries

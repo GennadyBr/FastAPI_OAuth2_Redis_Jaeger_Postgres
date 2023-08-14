@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.v1.models import ResponseRole, RequestNewRoleToUser, RequestRole
 from services.role import RoleService, get_role_service
 
-router = APIRouter()
+router = APIRouter(prefix="/role")
 
 
 @router.post(

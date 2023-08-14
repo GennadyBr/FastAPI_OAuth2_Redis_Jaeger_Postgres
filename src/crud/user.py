@@ -32,7 +32,7 @@ class UserDAL(CrudBase):  # User Data Access Layer создание, удале�
         await self.db_session.commit()
         return new_user
 
-    async def delete(self, uuid: Union[str, UUID]) -> Union[UUID, None]:
+    async def delete(self, id: Union[str, UUID]) -> Union[UUID, None]:
         query = update(User). \
             where(and_(User.uuid == id, User.is_active == True)). \
             values(is_active=False).returning(User.uuid)
