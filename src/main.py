@@ -6,6 +6,7 @@ from fastapi.responses import ORJSONResponse
 from fastapi.routing import APIRouter
 
 from api.v1.roles import router as role_router
+from api.v1.auth import router as auth_router
 from core.logger import LOGGING
 from core.config import app_settings
 
@@ -32,12 +33,9 @@ app = FastAPI(
 #     await es.close()
 
 
-app.include_router(auth.router, prefix='/api/v1', tags=['auth'])
+app.include_router(auth_router, prefix='/api/v1', tags=['auth'])
+app.include_router(role_router, prefix='/api/v1', tags=['role'])
 
-main_api_router = APIRouter()
-
-main_api_router.include_router(role_router, prefix="/role", tags=["role"])
-app.include_router(main_api_router)
 
 if __name__ == '__main__':
     uvicorn.run(
