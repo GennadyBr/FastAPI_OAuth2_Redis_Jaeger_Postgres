@@ -64,18 +64,3 @@ def make_post_request():
         return status, body
 
     return inner
-
-
-@pytest.fixture(scope="session", autouse=True)
-def login_to_get_token():
-    async def inner():
-        status_login, token = await make_post_request(api_postfix="/api/v1/auth",
-                                                      endpoint="/login",
-                                                      query_data={
-                                                          "login": "new_user_",
-                                                          "password": "123qwe"
-                                                      })
-        assert status_login == HTTPStatus.OK
-        return token
-
-    return inner
