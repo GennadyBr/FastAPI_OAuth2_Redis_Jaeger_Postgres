@@ -48,9 +48,9 @@ async def test_register(make_post_request, query_data, expected_answer):
 )
 @pytest.mark.asyncio
 async def test_login(make_post_request, query_data, expected_answer, request):
-    status_login, token = await make_post_request(api_postfix="/api/v1/auth",
-                                                  endpoint="/login",
-                                                  query_data=query_data)
+    status_login, token, refresh_token = await make_post_request(api_postfix="/api/v1/auth",
+                                                                 endpoint="/login",
+                                                                 query_data=query_data)
     assert status_login == expected_answer['status']
     payload = jwt.decode(
         token,
@@ -59,7 +59,8 @@ async def test_login(make_post_request, query_data, expected_answer, request):
         options={"verify_exp": False, },
     )
     assert payload['login'] == expected_answer["payload_user"]
-    request.config.cache.set('token', token)
+    request.config.cache.set('access_token', token)
+    request.config.cache.set('refresh_token', refresh_token)
 
 
 @pytest.mark.parametrize(
@@ -80,8 +81,8 @@ async def test_login(make_post_request, query_data, expected_answer, request):
     ]
 )
 @pytest.mark.asyncio
-async def test_me(make_get_request, make_post_request, query_data, expected_answer, request):
-    token = request.config.cache.get('token', None)
+async def test_me(make_get_request, query_data, expected_answer, request):
+    token = request.config.cache.get('access_token', None)
     status, body = await make_get_request(api_postfix="/api/v1/auth",
                                           endpoint="/me",
                                           token=token)
@@ -102,8 +103,8 @@ async def test_me(make_get_request, make_post_request, query_data, expected_answ
     ]
 )
 @pytest.mark.asyncio
-async def test_entries(make_get_request, make_post_request, query_data, expected_answer, request):
-    token = request.config.cache.get('token', None)
+async def test_entries(make_get_request, query_data, expected_answer, request):
+    token = request.config.cache.get('access_token', None)
     status, body = await make_get_request(api_postfix="/api/v1/auth",
                                           endpoint="/entries",
                                           token=token)
@@ -124,8 +125,8 @@ async def test_entries(make_get_request, make_post_request, query_data, expected
     ]
 )
 @pytest.mark.asyncio
-async def test_role(make_get_request, make_post_request, query_data, expected_answer, request):
-    token = request.config.cache.get('token', None)
+async def test_role(make_get_request, query_data, expected_answer, request):
+    token = request.config.cache.get('access_token', None)
     status, body = await make_get_request(api_postfix="/api/v1/auth",
                                           endpoint="/role",
                                           token=token)
@@ -156,11 +157,13 @@ async def test_role(make_get_request, make_post_request, query_data, expected_an
 )
 @pytest.mark.asyncio
 async def test_change_user_data(make_post_request, query_data, expected_answer, request):
-    token = request.config.cache.get('token', None)
+    access_token = request.config.cache.get('access_token', None)
+    refresh_token = request.config.cache.get('refresh_token', None)
     status, body = await make_post_request(api_postfix="/api/v1/auth",
                                            endpoint="/change_user_data",
                                            query_data=query_data,
-                                           token=token)
+                                           access_token=access_token,
+                                           refresh_token=refresh_token)
     assert status == expected_answer['status']
     assert body == expected_answer['body']
 
@@ -178,8 +181,8 @@ async def test_change_user_data(make_post_request, query_data, expected_answer, 
     ]
 )
 @pytest.mark.asyncio
-async def test_logout(make_get_request, make_post_request, query_data, expected_answer, request):
-    token = request.config.cache.get('token', None)
+async def test_logout(make_get_request, query_data, expected_answer, request):
+    token = request.config.cache.get('access_token', None)
     status, body = await make_get_request(api_postfix="/api/v1/auth",
                                           endpoint="/logout",
                                           token=token)
@@ -201,9 +204,9 @@ async def test_logout(make_get_request, make_post_request, query_data, expected_
 )
 @pytest.mark.asyncio
 async def test_logout_all(make_get_request, make_post_request, credentials, expected_answer):
-    status_login, token = await make_post_request(api_postfix="/api/v1/auth",
-                                                  endpoint="/login",
-                                                  query_data=credentials)
+    status_login, token, _ = await make_post_request(api_postfix="/api/v1/auth",
+                                                     endpoint="/login",
+                                                     query_data=credentials)
     assert status_login == HTTPStatus.OK
     status, body = await make_get_request(api_postfix="/api/v1/auth",
                                           endpoint="/logout_all",
@@ -231,14 +234,15 @@ async def test_logout_all(make_get_request, make_post_request, credentials, expe
 )
 @pytest.mark.asyncio
 async def test_change_pwd(make_post_request, credentials, query_data, expected_answer):
-    status_login, token = await make_post_request(api_postfix="/api/v1/auth",
-                                                  endpoint="/login",
-                                                  query_data=credentials)
+    status_login, token, refresh_token = await make_post_request(api_postfix="/api/v1/auth",
+                                                                 endpoint="/login",
+                                                                 query_data=credentials)
     assert status_login == HTTPStatus.OK
     status, body = await make_post_request(api_postfix="/api/v1/auth",
                                            endpoint="/change_pwd",
                                            query_data=query_data,
-                                           token=token)
+                                           access_token=token,
+                                           refresh_token=refresh_token)
     assert status == expected_answer['status']
     assert body == expected_answer['body']
 
@@ -263,6 +267,6 @@ async def test_deactivate_user(make_post_request, credentials, expected_answer):
     assert status_login == HTTPStatus.OK
     status, body = await make_post_request(api_postfix="/api/v1/auth",
                                            endpoint="/deactivate_user",
-                                           token=token)
+                                           access_token=token)
     assert status == expected_answer['status']
     assert body == expected_answer['body']

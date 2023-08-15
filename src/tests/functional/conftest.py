@@ -49,16 +49,21 @@ def make_post_request():
     async def inner(api_postfix: str,
                     endpoint: Optional[str] = None,
                     query_data: Optional[dict] = None,
-                    token: Optional[str] = None):
-        if token:
-            headers = {"Authorization": f"Bearer {token}"}
-            session = aiohttp.ClientSession(headers=headers)
+                    access_token: Optional[str] = None,
+                    refresh_token: Optional[str] = None):
+        if access_token or refresh_token:
+            headers = {"Authorization": f"Bearer {access_token}"}
+            cookies = {"refresh_token": f"{refresh_token}"}
+            session = aiohttp.ClientSession(headers=headers, cookies=cookies)
         else:
             session = aiohttp.ClientSession()
         url = test_settings.service_url + api_postfix + (endpoint or '')
         async with session.post(url, json=query_data) as response:
             body = await response.json()
             status = response.status
+            if response.cookies:
+                refresh_token = response.cookies.get("refresh_token")
+                return status, body, refresh_token
 
         await session.close()
         return status, body
