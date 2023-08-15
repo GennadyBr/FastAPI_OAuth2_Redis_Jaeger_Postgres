@@ -24,6 +24,6 @@ repos:
           # flake8-pytest-style
           # PT013 found incorrect import of pytest, use simple 'import pytest' instead
           "--max-line-length=110",
-          "--per-file-ignores=tests/*.py:S101"
+          "--per-file-ignores=src/tests/*.py:S101,F811,E126,F401,E402"
           # S101 Use of assert detected
         ]
