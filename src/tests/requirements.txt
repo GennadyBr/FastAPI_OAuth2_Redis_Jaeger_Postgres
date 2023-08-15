@@ -1,0 +1,7 @@
+pytest==7.4.0
+pytest-asyncio==0.21.1
+aiohttp==3.8.5
+redis==4.4.2
+pydantic==1.10.9
+backoff==2.2.1
+python-jose==3.3.0
