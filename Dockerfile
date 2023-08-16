@@ -15,4 +15,4 @@ COPY gunicorn.conf.py gunicorn.conf.py
 
 EXPOSE 8081
 
-CMD ["gunicorn",  "main:app", "-c", "gunicorn.conf.py"]
+ENTRYPOINT ["/bin/sh", "-c" , "python utils/wait_for_pg.py && gunicorn main:app -c gunicorn.conf.py"]
