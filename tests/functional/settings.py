@@ -25,6 +25,7 @@ class UserDBSettings(BaseSettings):
 class TestSettings(BaseSettings):
     redis_host: str = 'redis_token_test'
     redis_port: int = 6379
+    redis_password: SecretStr = ''
 
     servie_host: str = 'auth_test'
     service_port: int = 8081
