@@ -53,6 +53,7 @@ async def test_add_new_role(db_session, make_post_request,
                             query_data: dict, 
                             expected_answer: dict,
                             ):
+    """Тесты добавления новой роли"""
 
     try:
     
@@ -121,6 +122,7 @@ async def test_update_role(db_session, make_patch_request,
                            query_data: dict, 
                            expected_answer: dict,
                            ):
+    """Тесты обновления существующей роли"""
    
     try:
 
@@ -188,6 +190,7 @@ async def test_get_role(db_session, make_get_request,
                            query_params: dict, 
                            expected_answer: dict,
                            ):
+    """Тесты получения информации о роли"""
 
     try:
 
@@ -250,17 +253,19 @@ async def test_delete_role(db_session, make_delete_request,
                            query_params: dict, 
                            expected_answer: dict,
                            ):
-    if test_data:
-        new_role = Role(**test_data)
-        db_session.add(new_role)
-        db_session.commit()
-
-    status, body = await make_delete_request(api_postfix='/api/v1/role', 
-                                           endpoint='/',
-                                           params=query_params,
-                                           )
+    """Тесты удаления роли"""
     
     try:
+        if test_data:
+            new_role = Role(**test_data)
+            db_session.add(new_role)
+            db_session.commit()
+
+        status, body = await make_delete_request(api_postfix='/api/v1/role', 
+                                            endpoint='/',
+                                            params=query_params,
+                                            )
+
         assert status == expected_answer['status_code']
         
         if status != HTTPStatus.OK:
@@ -327,6 +332,7 @@ async def test_get_user_role(db_session, make_get_request,
                            query_params: dict, 
                            expected_answer: dict,
                            ):
+    """Тесты получения ролей пользователя"""
 
     try:
 
@@ -448,6 +454,7 @@ async def test_add_role_to_user(db_session, make_post_request,
                            query_data: dict, 
                            expected_answer: dict,
                            ):
+    """Тесты добавления ролей пользователю"""
 
     try:
 
@@ -564,8 +571,10 @@ async def test_delete_role_from_user(db_session, make_delete_request,
                            query_data: dict, 
                            expected_answer: dict,
                            ):
+    """Тесты удаления ролей пользователя"""
+
     try:
-        
+
         if test_data:
             if test_data.get('role', None):
                 new_role = Role(**test_data['role'])
