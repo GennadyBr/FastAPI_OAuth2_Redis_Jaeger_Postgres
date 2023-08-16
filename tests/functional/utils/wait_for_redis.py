@@ -24,7 +24,10 @@ logging.basicConfig(
 
 @backoff.on_exception(backoff.expo, RedisConEr, max_tries=100, raise_on_giveup=False)
 def waiting_redis():
-    redis_client = Redis(host=test_settings.redis_host, port=test_settings.redis_port, password="123qwe")
+    redis_client = Redis(host=test_settings.redis_host, 
+                         port=test_settings.redis_port, 
+                         password=test_settings.redis_password.get_secret_value(),
+                         )
     while True:
         logging.info('Waiting for redis')
         if redis_client.ping():
