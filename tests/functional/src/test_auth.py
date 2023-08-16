@@ -2,7 +2,6 @@ from http import HTTPStatus
 
 import pytest
 from jose import jwt
-from conftest import make_post_request, event_loop, make_get_request
 
 
 @pytest.mark.parametrize(
