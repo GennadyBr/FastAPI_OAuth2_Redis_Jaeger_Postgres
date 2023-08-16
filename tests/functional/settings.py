@@ -35,6 +35,18 @@ class TestSettings(BaseSettings):
         return f'http://{cls.servie_host}:{cls.service_port}'
 
 
+class TokenSettings(BaseSettings):
+    access_expire: int = 10  # min
+    access_secret_key: SecretStr = ''
+    refresh_expire: int = 60  # min
+    refresh_secret_key: SecretStr = ''
+    refresh_token_cookie_name: str = 'refresh_token'
+    algorithm: str = 'HS256'
+
+    class Config:
+        env_prefix = 'token_'
+
+
 class LoggerSettings(BaseSettings):
     format: str = "%(asctime)19s | %(levelname)s | %(message)s"
     datefmt: str = "%d.%m.%Y %H:%M:%S"
@@ -43,4 +55,5 @@ class LoggerSettings(BaseSettings):
 
 test_settings = TestSettings()
 user_db_settings = UserDBSettings()
+token_settings = TokenSettings()
 logger_settings = LoggerSettings()
