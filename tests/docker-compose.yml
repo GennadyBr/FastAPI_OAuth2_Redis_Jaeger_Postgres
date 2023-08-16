@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+
+  db_users_test:
+    image: postgres:13
+    container_name: db_users_test
+    env_file:
+      - .env.test
+    ports:
+      - "5432:5432"
+
+  redis_token_test:
+    image: redis:7.2-rc2
+    env_file:
+      - .env.test
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+    restart: on-failure
+
+  auth_test:
+    build: ../
+    image: auth_api_test
+    container_name: auth_test
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env.test
+    entrypoint: ["/bin/sh", "-c" , "python utils/wait_for_pg.py && alembic upgrade head && python3 main.py"]
+    depends_on:
+      - redis_token_test
+      - db_users_test
+
+  tests:
+    build:
+      context: .
+    env_file:
+      - .env.test
+    depends_on:
+      - auth_test
