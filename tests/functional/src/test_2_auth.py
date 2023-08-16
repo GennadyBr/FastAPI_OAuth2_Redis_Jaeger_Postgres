@@ -3,6 +3,8 @@ from http import HTTPStatus
 import pytest
 from jose import jwt
 
+from settings import token_settings
+
 
 @pytest.mark.parametrize(
     'query_data, expected_answer',
@@ -53,7 +55,7 @@ async def test_login(make_post_request, query_data, expected_answer, request):
     assert status_login == expected_answer['status']
     payload = jwt.decode(
         token,
-        "qwe",
+        token_settings.access_secret_key.get_secret_value(),
         algorithms=["HS256"],
         options={"verify_exp": False, },
     )
