@@ -27,9 +27,9 @@ from conftest import make_post_request, event_loop, make_get_request
 )
 @pytest.mark.asyncio
 async def test_register(make_post_request, query_data, expected_answer):
-    status, body = await make_post_request(api_postfix="/api/v1/auth",
-                                           endpoint="/register",
-                                           query_data=query_data)
+    status, body, _ = await make_post_request(api_postfix="/api/v1/auth",
+                                              endpoint="/register",
+                                              query_data=query_data)
     assert status == expected_answer['status']
     assert body == expected_answer['body']
 
@@ -159,11 +159,11 @@ async def test_role(make_get_request, query_data, expected_answer, request):
 async def test_change_user_data(make_post_request, query_data, expected_answer, request):
     access_token = request.config.cache.get('access_token', None)
     refresh_token = request.config.cache.get('refresh_token', None)
-    status, body = await make_post_request(api_postfix="/api/v1/auth",
-                                           endpoint="/change_user_data",
-                                           query_data=query_data,
-                                           access_token=access_token,
-                                           refresh_token=refresh_token)
+    status, body, _ = await make_post_request(api_postfix="/api/v1/auth",
+                                              endpoint="/change_user_data",
+                                              query_data=query_data,
+                                              access_token=access_token,
+                                              refresh_token=refresh_token)
     assert status == expected_answer['status']
     assert body == expected_answer['body']
 
@@ -173,7 +173,7 @@ async def test_change_user_data(make_post_request, query_data, expected_answer, 
     [
         (
                 {
-                    "login": "new_user_",
+                    "login": "new_login",
                     "password": "123qwe"
                 },
                 {'status': HTTPStatus.OK, 'body': None}
@@ -238,11 +238,13 @@ async def test_change_pwd(make_post_request, credentials, query_data, expected_a
                                                                  endpoint="/login",
                                                                  query_data=credentials)
     assert status_login == HTTPStatus.OK
-    status, body = await make_post_request(api_postfix="/api/v1/auth",
-                                           endpoint="/change_pwd",
-                                           query_data=query_data,
-                                           access_token=token,
-                                           refresh_token=refresh_token)
+    assert refresh_token is not None
+
+    status, body, _ = await make_post_request(api_postfix="/api/v1/auth",
+                                              endpoint="/change_pwd",
+                                              query_data=query_data,
+                                              access_token=token,
+                                              refresh_token=refresh_token)
     assert status == expected_answer['status']
     assert body == expected_answer['body']
 
@@ -261,12 +263,12 @@ async def test_change_pwd(make_post_request, credentials, query_data, expected_a
 )
 @pytest.mark.asyncio
 async def test_deactivate_user(make_post_request, credentials, expected_answer):
-    status_login, token = await make_post_request(api_postfix="/api/v1/auth",
-                                                  endpoint="/login",
-                                                  query_data=credentials)
+    status_login, token, _ = await make_post_request(api_postfix="/api/v1/auth",
+                                                     endpoint="/login",
+                                                     query_data=credentials)
     assert status_login == HTTPStatus.OK
-    status, body = await make_post_request(api_postfix="/api/v1/auth",
-                                           endpoint="/deactivate_user",
-                                           access_token=token)
+    status, body, _ = await make_post_request(api_postfix="/api/v1/auth",
+                                              endpoint="/deactivate_user",
+                                              access_token=token)
     assert status == expected_answer['status']
     assert body == expected_answer['body']
