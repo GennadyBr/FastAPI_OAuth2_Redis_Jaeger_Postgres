@@ -87,6 +87,18 @@ class RoleDAL(CrudBase):
             log.error("Ошибка: ", err)
             log.error("Тип ошибки: ", type(err))
             return err
+    
+    async def get_by_name(self, name: str) -> Union[Role, None]:
+        try:
+            query = select(Role).where(Role.name == name)
+            res = await self.db_session.execute(query)
+            role_row = res.fetchone()
+            if role_row is not None:
+                return role_row[0]
+        except Exception as err:
+            log.error("Ошибка: ", err)
+            log.error("Тип ошибки: ", type(err))
+            return err
 
     async def get_all(self) -> Union[List[Role], None, Exception]:
         try:
