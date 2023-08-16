@@ -3,11 +3,12 @@ from abc import ABC, abstractmethod
 from functools import lru_cache
 from typing import List, Optional
 
-from fastapi import Depends
+from fastapi import status, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crud.role import RoleDAL
 from crud.user_role import UserRoleDAL
+from crud.user import UserDAL
 from db.session import get_db
 from models.role import RoleResponse
 
@@ -55,62 +56,147 @@ class RoleService(RoleServiceBase):
         async with self.db as session:
             async with session.begin():
                 role_dal = RoleDAL(session)
-                role = await role_dal.create(name=role_name)
-                return RoleResponse(uuid=role.uuid, name=role.name)
+                role_exists = await role_dal.get_by_name(role_name)
+                if role_exists:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail='Role already exist',
+                        )
+                try:
+                    role = await role_dal.create(name=role_name)
+                    return RoleResponse(uuid=role.uuid, name=role.name)
+                except:
+                    return
 
     async def read_role(self, role_id: uuid.UUID) -> Optional[RoleResponse]:
         async with self.db as session:
             async with session.begin():
                 role_dal = RoleDAL(session)
-                role = await role_dal.get(id=role_id)
-                return RoleResponse(uuid=role.uuid, name=role.name)
+                role_exists = await role_dal.get(role_id)
+                if not role_exists:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail='Role does not exist',
+                        )
+                try:
+                    role = await role_dal.get(id=role_id)
+                    return RoleResponse(uuid=role.uuid, name=role.name)
+                except:
+                    return
 
     async def read_roles(self) -> Optional[List[RoleResponse]]:
         async with self.db as session:
             async with session.begin():
                 role_dal = RoleDAL(session)
-                roles = await role_dal.get_all()
-                return [RoleResponse(uuid=role.uuid, name=role.name) for role in roles]
+                try:
+                    roles = await role_dal.get_all()
+                    return [RoleResponse(uuid=role.uuid, name=role.name) for role in roles]
+                except:
+                    return
 
     async def update_role(self, role_id: uuid.UUID, name: str) -> Optional[RoleResponse]:
         async with self.db as session:
             async with session.begin():
                 role_dal = RoleDAL(session)
-                updated_role_id = await role_dal.update(id=role_id, name=name)
+                role_exists = await role_dal.get(role_id)
+                if not role_exists:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail='Role does not exist',
+                        )
+                try:
+                    updated_role_id = await role_dal.update(id=role_id, name=name)
+                except:
+                    return
 
-        return await self.read_role(updated_role_id)
+        updated_role = await self.read_role(updated_role_id)
+        return updated_role
 
     async def delete_role(self, role_id: uuid.UUID) -> bool:
         async with self.db as session:
             async with session.begin():
                 role_dal = RoleDAL(session)
-                deleted_role_id = await role_dal.delete(uuid=role_id)
-                if deleted_role_id:
-                    return True
-                return False
+                role_exists = await role_dal.get(role_id)
+                if not role_exists:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail='Role does not exist',
+                        )
+                try:
+                    deleted_role_id = await role_dal.delete(uuid=role_id)
+                    return bool(deleted_role_id)
+                except:
+                    return
 
     async def get_user_access_area(self, user_id: uuid.UUID) -> List[RoleResponse]:
         async with self.db as session:
             async with session.begin():
                 role_dal = RoleDAL(session)
-                user_roles = await role_dal.get_by_user_id(user_id)
-                return [RoleResponse(uuid=role.uuid, name=role.name) for role in user_roles]
+                user_dal = UserDAL(session)
+                user_exists = await user_dal.get(user_id)
+                if not user_exists:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail='User does not exist',
+                        )
+                try:
+                    user_roles = await role_dal.get_by_user_id(user_id)
+                    return [RoleResponse(uuid=role.uuid, name=role.name) for role in user_roles]
+                except:
+                    return
 
     async def set_role_to_user(self, user_id: uuid.UUID, role_id: uuid.UUID) -> bool:
         async with self.db as session:
             async with session.begin():
                 user_role_dal = UserRoleDAL(session)
-                new_user_role = await user_role_dal.create(user_id, role_id)
-                if new_user_role:
-                    return True
-                return False
+                role_dal = RoleDAL(session)
+                user_dal = UserDAL(session)
+                
+                user_exists = await user_dal.get(user_id)
+                if not user_exists:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail='User does not exist',
+                        )
+                
+                role_exists = await role_dal.get(role_id)
+                if not role_exists:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail='Role does not exist',
+                        )
+                
+                try:
+                    new_user_role = await user_role_dal.create(user_id, role_id)
+                    return bool(new_user_role)
+                except:
+                    return
 
-    async def remove_role_from_user(self, user_id: uuid.UUID, role_id: uuid.UUID):
+    async def remove_role_from_user(self, user_id: uuid.UUID, role_id: uuid.UUID) -> bool:
         async with self.db as session:
             async with session.begin():
                 role_dal = RoleDAL(session)
-                await role_dal.delete_by_user_id_and_role_id(user_id, role_id)
-                return True
+                user_dal = UserDAL(session)
+                
+                user_exists = await user_dal.get(user_id)
+                if not user_exists:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail='User does not exist',
+                        )
+                
+                role_exists = await role_dal.get(role_id)
+                if not role_exists:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail='Role does not exist',
+                        )
+                
+                try:
+                    await role_dal.delete_by_user_id_and_role_id(user_id, role_id)
+                    return True
+                except:
+                    return
 
 
 @lru_cache()
