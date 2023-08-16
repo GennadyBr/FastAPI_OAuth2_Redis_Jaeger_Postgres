@@ -55,7 +55,7 @@ async def test_login(make_post_request, query_data, expected_answer, request):
     assert status_login == expected_answer['status']
     payload = jwt.decode(
         token,
-        token_settings.access_secret_key,
+        token_settings.access_secret_key.get_secret_value(),
         algorithms=["HS256"],
         options={"verify_exp": False, },
     )
