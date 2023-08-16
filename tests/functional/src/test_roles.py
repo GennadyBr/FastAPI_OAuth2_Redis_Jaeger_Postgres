@@ -33,17 +33,17 @@ User = Base.classes.users
                  }
         ),
         
-        # # существующая роль
-        # (
-        #         {
-        #             'uuid': uuid4(),
-        #             'name': 'premium'
-        #             },
-        #         {'name': 'premium'},
-        #         {'status_code': HTTPStatus.FORBIDDEN, 
-        #          'body': {'Role is not created'}, 
-        #          }
-        # ),
+        # существующая роль
+        (
+                {
+                    'uuid': uuid4(),
+                    'name': 'premium'
+                    },
+                {'name': 'premium'},
+                {'status_code': HTTPStatus.BAD_REQUEST, 
+                 'body': {'detail': 'Role already exist'}, 
+                 }
+        ),
         
     ]
 )
@@ -67,9 +67,10 @@ async def test_add_new_role(db_session, make_post_request,
                                             query_data=query_data)
     
         assert status == expected_answer['status_code']
-        assert body['name'] == expected_answer['body']['name']
         
         if status == HTTPStatus.OK:
+
+            assert body['name'] == expected_answer['body']['name']
         
             query = select(Role).where(Role.name == query_data['name'])
             res = db_session.execute(query)
@@ -77,7 +78,9 @@ async def test_add_new_role(db_session, make_post_request,
             
             assert db_record.name == body['name']
             assert str(db_record.uuid) == str(body['uuid'])
-            
+        
+        else:
+            assert body == expected_answer['body']
         
     finally:
 
@@ -237,14 +240,14 @@ async def test_get_role(db_session, make_get_request,
                 #  'body': {True}, 
                  }
         ),
-        # # несуществующая роль
-        # (
-        #         {},
-        #         {'role_id': 'ac58efef-be6f-410f-add8-d3ce339739f0'},
-        #         {'status_code': HTTPStatus.NOT_FOUND, 
-        #          'body': {'Role is not found for deleting'}, 
-        #          }
-        # ),
+        # несуществующая роль
+        (
+                {},
+                {'role_id': 'ac58efef-be6f-410f-add8-d3ce339739f0'},
+                {'status_code': HTTPStatus.NOT_FOUND, 
+                 'body': {'detail': 'Role does not exist'}, 
+                 }
+        ),
     ]
 )
 @pytest.mark.asyncio
