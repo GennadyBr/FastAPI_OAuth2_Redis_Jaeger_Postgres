@@ -1,29 +1,12 @@
+from datetime import datetime
 import uuid
 
-from pydantic import BaseModel, Field
-
-
-class UUIDMixIn(BaseModel):
-    id: uuid.UUID = Field(..., alias="uuid")
-
-    class Config:
-        allow_population_by_field_name = True
-
-
-class ResponseRole(UUIDMixIn):
-    name: str = Field()
-
-
-class RequestRole(BaseModel):
-    name: str = Field()
-
-
-class RequestNewRoleToUser(BaseModel):
-    user_id: uuid.UUID = Field()
-    role_id: uuid.UUID = Field()
-from datetime import datetime
-
 from pydantic import BaseModel, Field, EmailStr, validator, root_validator, SecretStr
+
+
+
+
+
 
 
 def _only_letters_validator(value: str) -> str:
@@ -61,12 +44,6 @@ class LoginRequest(BaseModel):
     login: str
     password: SecretStr
 
-class UpdateUserDataRequest(BaseModel):
-    login: str
-    name: str
-    surname: str
-    email: EmailStr
-    password: str
 
 class ChangeUserPwdRequest(BaseModel):
     old_password: SecretStr
@@ -95,6 +72,18 @@ class ChangeUserDataRequest(BaseModel):
             return _only_letters_validator(value)
         return
 
+class UUIDMixIn(BaseModel):
+    id: uuid.UUID = Field(..., alias="uuid")
+
+    class Config:
+        allow_population_by_field_name = True
+
+class RequestRole(BaseModel):
+    name: str = Field()
+
+class RequestNewRoleToUser(BaseModel):
+    user_id: uuid.UUID = Field()
+    role_id: uuid.UUID = Field()
 
 ################### Response models ###################
 
@@ -114,3 +103,6 @@ class EntryResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+class ResponseRole(UUIDMixIn):
+    name: str = Field()
