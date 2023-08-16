@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-from http import HTTPStatus
 from typing import Optional
 
 import aiohttp
@@ -77,9 +76,14 @@ def make_post_request():
     async def inner(api_postfix: str,
                     endpoint: Optional[str] = None,
                     query_data: Optional[dict] = None,
-                    token: Optional[str] = None):
-        if token:
-            headers = {"Authorization": f"Bearer {token}"}
+                    access_token: Optional[str] = None,
+                    refresh_token: Optional[str] = None):
+        headers = dict()
+        if access_token:
+            headers.update({"Authorization": f"Bearer {access_token}"})
+        if refresh_token:
+            headers.update({"Cookie": f"refresh_token={refresh_token}"})
+        if headers:
             session = aiohttp.ClientSession(headers=headers)
         else:
             session = aiohttp.ClientSession()
@@ -88,12 +92,16 @@ def make_post_request():
             async with session.post(url, json=query_data) as response:
                 body = await response.json()
                 status = response.status
+                if response.cookies:
+                    refresh_token = response.cookies.get("refresh_token")
+                    return status, body, refresh_token.value
 
         finally:
             await session.close()
-        return status, body
+        return status, body, None
 
     return inner
+
 
 @pytest.fixture(scope='session', autouse=True)
 def make_patch_request():
@@ -118,6 +126,7 @@ def make_patch_request():
         return status, body
 
     return inner
+
 
 @pytest.fixture(scope='session', autouse=True)
 def make_delete_request():
