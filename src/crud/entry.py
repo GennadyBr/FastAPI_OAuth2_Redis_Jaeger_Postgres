@@ -86,13 +86,20 @@ class EntryDAL(CrudBase):
     async def get_by_user_id(self,
                              user_id: UUID,
                              unique: bool = False,
-                             only_active: bool = False) -> Optional[Union[List[Entry], None, Exception]]:
+                             only_active: bool = False,
+                             page_size: int = None, 
+                             page_number: int = None,
+                             ) -> Optional[Union[List[Entry], None, Exception]]:
         try:
             query = select(Entry).where(Entry.user_id == user_id)
             if only_active:
                 query = query.where(Entry.is_active == True)
             if unique:
                 query = query.distinct(tuple_(Entry.user_agent, Entry.is_active))
+            if page_size:
+                query = query.limit(page_size)
+            if page_number: 
+                query = query.offset(page_number*page_size - page_size)
             res = await self.db_session.execute(query)
             entries = res.scalars().fetchall()
             return entries

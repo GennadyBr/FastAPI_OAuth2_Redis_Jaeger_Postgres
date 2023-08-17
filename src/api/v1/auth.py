@@ -1,6 +1,6 @@
 from typing import List, Annotated
 
-from fastapi import APIRouter, Depends, Header, Response, Cookie
+from fastapi import APIRouter, Depends, Header, Response, Cookie, Query
 
 from core.config import token_settings
 from .models import UserCreateRequest, ChangeUserPwdRequest, ChangeUserDataRequest, UserResponse, LoginRequest, \
@@ -91,8 +91,10 @@ async def user_data(token: str = Depends(verify_access_token),
 async def user_entries(unique: bool = True,
                        token: str = Depends(verify_access_token),
                        auth_service: AuthServiceBase = Depends(get_auth_service),
+                       page_size: Annotated[int, Query(description="Pagination page size", ge=1)] = 10,
+                       page_number: Annotated[int, Query(description="Pagination page number", ge=1)] = 1,
                        ) -> List[EntryResponse]:
-    user_entries = await auth_service.entry_history(token, unique)
+    user_entries = await auth_service.entry_history(token, unique, page_size, page_number)
     return [EntryResponse.from_orm(entry) for entry in user_entries]
 
 
