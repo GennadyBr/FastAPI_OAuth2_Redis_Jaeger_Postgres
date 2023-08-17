@@ -4,15 +4,11 @@ import uuid
 from pydantic import BaseModel, Field, EmailStr, validator, root_validator, SecretStr
 
 
-
-
-
-
-
 def _only_letters_validator(value: str) -> str:
-        if not value.isalpha():
-            raise ValueError('name and surname must contains only letters')
-        return value
+    if not value.isalpha():
+        raise ValueError('name and surname must contains only letters')
+    return value
+
 
 def _pwd_validator(value: str) -> str:
     min_len = 3
@@ -22,7 +18,6 @@ def _pwd_validator(value: str) -> str:
         raise ValueError('password must contain letters, numbers and special characters')
     return value
 
-################### Request models ###################
 
 class UserCreateRequest(BaseModel):
     login: str
@@ -60,6 +55,7 @@ class ChangeUserPwdRequest(BaseModel):
         _pwd_validator(values['new_password'].get_secret_value())
         return values
 
+
 class ChangeUserDataRequest(BaseModel):
     login: str = None
     name: str = None
@@ -72,20 +68,22 @@ class ChangeUserDataRequest(BaseModel):
             return _only_letters_validator(value)
         return
 
+
 class UUIDMixIn(BaseModel):
     id: uuid.UUID = Field(..., alias="uuid")
 
     class Config:
         allow_population_by_field_name = True
 
+
 class RequestRole(BaseModel):
     name: str = Field()
+
 
 class RequestNewRoleToUser(BaseModel):
     user_id: uuid.UUID = Field()
     role_id: uuid.UUID = Field()
 
-################### Response models ###################
 
 class UserResponse(BaseModel):
     name: str
@@ -96,6 +94,7 @@ class UserResponse(BaseModel):
     class Config:
         orm_mode = True
 
+
 class EntryResponse(BaseModel):
     user_agent: str = None
     date_time: datetime
@@ -103,6 +102,7 @@ class EntryResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class ResponseRole(UUIDMixIn):
     name: str = Field()

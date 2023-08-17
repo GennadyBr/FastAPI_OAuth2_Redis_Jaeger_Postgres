@@ -9,6 +9,7 @@ class TokenType(str, Enum):
     access = 'access'
     refresh = 'refresh'
 
+
 class TokenPayloadBase(BaseModel):
     sub: str
     login: str
@@ -18,10 +19,12 @@ class TokenPayloadBase(BaseModel):
     @property
     def left_time(self):
         delta = datetime.now(timezone.utc) - self.exp
-        return delta.seconds # sec
+        return delta.seconds  # sec
+
 
 class AccessTokenPayload(TokenPayloadBase):
     pass
+
 
 class RefreshTokenPayload(TokenPayloadBase):
     session_id: str

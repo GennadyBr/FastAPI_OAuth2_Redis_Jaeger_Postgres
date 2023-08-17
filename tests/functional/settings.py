@@ -12,8 +12,9 @@ class UserDBSettings(BaseSettings):
         env_prefix = 'pg_db_'
 
     def _url(cls, asyncpg: bool = False) -> AnyUrl:
-        return f'postgresql{"+asyncpg" * asyncpg}://{cls.user}:{cls.password.get_secret_value()}@{cls.service_name}:{cls.port}/{cls.name}'
-    
+        return f'postgresql{"+asyncpg" * asyncpg}://{cls.user}:{cls.password.get_secret_value()}@{cls.service_name}' \
+               f':{cls.port}/{cls.name}'
+
     @property
     def url(cls) -> AnyUrl:
         return cls._url()
@@ -21,6 +22,7 @@ class UserDBSettings(BaseSettings):
     @property
     def async_url(cls) -> AnyUrl:
         return cls._url(asyncpg=True)
+
 
 class TestSettings(BaseSettings):
     redis_host: str = 'redis_token_test'
