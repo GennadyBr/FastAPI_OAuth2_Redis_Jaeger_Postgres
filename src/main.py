@@ -19,17 +19,6 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
 )
 
-# @app.on_event('startup')
-# async def startup():
-#     redis = await get_cache()
-#     es = await create_es()
-
-
-# @app.on_event('shutdown')
-# async def shutdown():
-#     await redis.close()
-#     await es.close()
-
 
 app.include_router(auth_router, prefix='/api/v1', tags=['auth'])
 app.include_router(role_router, prefix='/api/v1', tags=['role'])

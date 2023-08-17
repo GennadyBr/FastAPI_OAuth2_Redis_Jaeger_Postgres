@@ -206,10 +206,10 @@ class AuthService(AuthServiceBase, HashManagerBase):
         token_data = await self.token_manager.get_data_from_access_token(access_token)
         return token_data.role
 
-    async def entry_history(self, access_token: str, unique: bool) -> List[DBEntry]:
+    async def entry_history(self, access_token: str, unique: bool, page_size: int, page_number: int) -> List[DBEntry]:
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         token_data = await self.token_manager.get_data_from_access_token(access_token)
-        entry_history = await entry_crud.get_by_user_id(token_data.sub, unique=unique)
+        entry_history = await entry_crud.get_by_user_id(token_data.sub, unique=unique, page_size=page_size, page_number=page_number)
         return entry_history
 
     async def user_data(self, access_token: str) -> DBUser:

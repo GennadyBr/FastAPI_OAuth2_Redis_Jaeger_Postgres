@@ -8,16 +8,15 @@ from core.config import redis_settings
 
 
 class TokenDBBase(ABC):
-    """ """
 
     @abstractmethod
     async def put(self, token: str, user_id: str, expire_in_sec: int) -> None:
-        """ """
+        """Add token to token db"""
         pass
 
     @abstractmethod
     async def is_exist(self, token: str) -> bool:
-        """ """
+        """Check token is exists"""
         pass
 
 
