@@ -16,7 +16,7 @@ from db.session import get_db
 
 class HashManagerBase(ABC):
     """Hashing and verifying passwords"""
-    
+
     @abstractmethod
     def hash_pwd(self, pwd: str) -> str:
         """Get a hashed password"""
@@ -88,9 +88,9 @@ class AuthServiceBase(ABC):
 
 
 class AuthService(AuthServiceBase, HashManagerBase):
-    def __init__(self, 
-                 token_db: TokenDBBase, 
-                 token_manager: TokenManagerBase, 
+    def __init__(self,
+                 token_db: TokenDBBase,
+                 token_manager: TokenManagerBase,
                  user_db_session: AsyncSession,
                  ) -> None:
         self.token_db = token_db
@@ -114,20 +114,16 @@ class AuthService(AuthServiceBase, HashManagerBase):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail='User already exist',
-                )
+            )
         # добавление пользователя с хешированием пароля
-        new_user = await user_crud.create(**user.dict(exclude={'password',}),
-                                          password = self.hash_pwd(user.password.get_secret_value()),
+        new_user = await user_crud.create(**user.dict(exclude={'password', }),
+                                          password=self.hash_pwd(user.password.get_secret_value()),
                                           )
-        # добавление роли пользователю
-        # new_user_role = user_models.UserRoleCreate(user_id=new_user.uuid, 
-        #                                role_id=)
-        # new_user_role = await self.role_crud.create(new_user_role)
         return new_user
-    
-    async def _generate_tokens(self, 
-                               user: DBUser, 
-                               entry: DBEntry, 
+
+    async def _generate_tokens(self,
+                               user: DBUser,
+                               entry: DBEntry,
                                ) -> Tuple[str, str]:
         role_crud = role_dal.RoleDAL(self.user_db_session)
         roles = await role_crud.get_by_user_id(user.uuid)
@@ -150,22 +146,22 @@ class AuthService(AuthServiceBase, HashManagerBase):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail='Incorrect login or password',
-                )
-        
+            )
+
         if not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail='Account is not active',
-                )
+            )
 
         exist_session = await entry_crud.get_by_user_agent(user_agent, only_active=True)
-        
+
         if exist_session:
             await self._close_session(exist_session.refresh_token)
 
         access_token, refresh_token = await self._open_session(user, user_agent)
         return access_token, refresh_token
-    
+
     async def _open_session(self, user: DBUser, user_agent: str) -> Tuple[str, str]:
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         # записать сессию в БД
@@ -174,16 +170,16 @@ class AuthService(AuthServiceBase, HashManagerBase):
         # записать токен в БД
         await entry_crud.update(session.uuid, refresh_token=refresh_token)
         return access_token, refresh_token
-    
+
     async def _close_session(self, refresh_token: str) -> None:
         if refresh_token is None:
             return
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         refresh_token_data = await self.token_manager.get_data_from_refresh_token(refresh_token)
-        await entry_crud.delete(refresh_token_data.session_id) # db.close_session(refresh_token_data.session_id)
+        await entry_crud.delete(refresh_token_data.session_id)
         await self.token_db.put(refresh_token, refresh_token_data.sub, refresh_token_data.left_time)
-    
-    async def logout(self, access_token: str, refresh_token: str, user_agent: str = None) -> None:
+
+    async def logout(self, access_token: str, refresh_token: str, user_agent: str = None):
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         access_token_data = await self.token_manager.get_data_from_access_token(access_token)
         user_id = access_token_data.sub
@@ -198,18 +194,18 @@ class AuthService(AuthServiceBase, HashManagerBase):
 
     async def logout_all(self, access_token: str) -> None:
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
-        access_token_data =  await self.token_manager.get_data_from_access_token(access_token)
+        access_token_data = await self.token_manager.get_data_from_access_token(access_token)
         user_id = access_token_data.sub
         await self.token_db.put(access_token, user_id, access_token_data.left_time)
         active_sessions = await entry_crud.get_by_user_id(user_id, only_active=True)
         for session in active_sessions:
             if session.refresh_token:
                 await self._close_session(session.refresh_token)
-        
+
     async def user_role(self, access_token: str) -> str:
         token_data = await self.token_manager.get_data_from_access_token(access_token)
         return token_data.role
-    
+
     async def entry_history(self, access_token: str, unique: bool) -> List[DBEntry]:
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         token_data = await self.token_manager.get_data_from_access_token(access_token)
@@ -229,7 +225,8 @@ class AuthService(AuthServiceBase, HashManagerBase):
         updated_user = await user_crud.get(updated_user_id)
         return updated_user
 
-    async def update_user_password(self, access_token: str, refresh_token: str, changed_data: user_models.ChangeUserPwd) -> None:
+    async def update_user_password(self, access_token: str, refresh_token: str,
+                                   changed_data: user_models.ChangeUserPwd) -> None:
         user_crud = user_dal.UserDAL(self.user_db_session)
         token_data = await self.token_manager.get_data_from_access_token(access_token)
         # проверка старого пароля
@@ -238,11 +235,14 @@ class AuthService(AuthServiceBase, HashManagerBase):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail='Incorrect old password',
-                )
+            )
         # добавление нового пароля
-        await user_crud.update(token_data.sub, password=self.hash_pwd(changed_data.new_password.get_secret_value()))
+        await user_crud.update(
+            token_data.sub,
+            password=self.hash_pwd(changed_data.new_password.get_secret_value())
+        )
         await self.logout(access_token, refresh_token)
-    
+
     async def refresh_tokens(self, refresh_token: str, user_agent: str) -> Tuple[str, str]:
         user_crud = user_dal.UserDAL(self.user_db_session)
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
@@ -262,12 +262,11 @@ class AuthService(AuthServiceBase, HashManagerBase):
         token_data = await self.token_manager.get_data_from_access_token(access_token)
         await self.logout_all(access_token)
         await user_crud.delete(token_data.sub)
-       
 
 
 @lru_cache()
 def get_auth_service(token_db: TokenDBBase = Depends(get_token_db),
                      token_manager: TokenManagerBase = Depends(get_token_manager),
-                     user_db_session = Depends(get_db),
+                     user_db_session=Depends(get_db),
                      ) -> AuthService:
     return AuthService(token_db, token_manager, user_db_session)

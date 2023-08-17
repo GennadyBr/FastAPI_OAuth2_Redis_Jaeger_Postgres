@@ -87,7 +87,7 @@ class RoleDAL(CrudBase):
             log.error("Ошибка: ", err)
             log.error("Тип ошибки: ", type(err))
             return err
-    
+
     async def get_by_name(self, name: str) -> Union[Role, None]:
         try:
             query = select(Role).where(Role.name == name)
@@ -112,7 +112,9 @@ class RoleDAL(CrudBase):
             log.error("Тип ошибки: ", type(err))
             return err
 
-    async def delete_by_user_id_and_role_id(self, user_id: UUID, role_id: UUID) -> Optional[Union[List[Role], Exception]]:
+    async def delete_by_user_id_and_role_id(self,
+                                            user_id: UUID,
+                                            role_id: UUID) -> Optional[Union[List[Role], Exception]]:
         try:
             query = select(UserRole). \
                 join(Role, Role.uuid == UserRole.role_id). \

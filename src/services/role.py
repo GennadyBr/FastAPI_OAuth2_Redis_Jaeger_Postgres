@@ -61,11 +61,11 @@ class RoleService(RoleServiceBase):
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail='Role already exist',
-                        )
+                    )
                 try:
                     role = await role_dal.create(name=role_name)
                     return RoleResponse(uuid=role.uuid, name=role.name)
-                except:
+                except Exception:
                     return
 
     async def read_role(self, role_id: uuid.UUID) -> Optional[RoleResponse]:
@@ -77,11 +77,11 @@ class RoleService(RoleServiceBase):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail='Role does not exist',
-                        )
+                    )
                 try:
                     role = await role_dal.get(id=role_id)
                     return RoleResponse(uuid=role.uuid, name=role.name)
-                except:
+                except Exception:
                     return
 
     async def read_roles(self) -> Optional[List[RoleResponse]]:
@@ -91,7 +91,7 @@ class RoleService(RoleServiceBase):
                 try:
                     roles = await role_dal.get_all()
                     return [RoleResponse(uuid=role.uuid, name=role.name) for role in roles]
-                except:
+                except Exception:
                     return
 
     async def update_role(self, role_id: uuid.UUID, name: str) -> Optional[RoleResponse]:
@@ -103,10 +103,10 @@ class RoleService(RoleServiceBase):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail='Role does not exist',
-                        )
+                    )
                 try:
                     updated_role_id = await role_dal.update(id=role_id, name=name)
-                except:
+                except Exception:
                     return
 
         updated_role = await self.read_role(updated_role_id)
@@ -121,11 +121,11 @@ class RoleService(RoleServiceBase):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail='Role does not exist',
-                        )
+                    )
                 try:
                     deleted_role_id = await role_dal.delete(uuid=role_id)
                     return bool(deleted_role_id)
-                except:
+                except Exception:
                     return
 
     async def get_user_access_area(self, user_id: uuid.UUID) -> List[RoleResponse]:
@@ -138,11 +138,11 @@ class RoleService(RoleServiceBase):
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail='User does not exist',
-                        )
+                    )
                 try:
                     user_roles = await role_dal.get_by_user_id(user_id)
                     return [RoleResponse(uuid=role.uuid, name=role.name) for role in user_roles]
-                except:
+                except Exception:
                     return
 
     async def set_role_to_user(self, user_id: uuid.UUID, role_id: uuid.UUID) -> bool:
@@ -151,25 +151,25 @@ class RoleService(RoleServiceBase):
                 user_role_dal = UserRoleDAL(session)
                 role_dal = RoleDAL(session)
                 user_dal = UserDAL(session)
-                
+
                 user_exists = await user_dal.get(user_id)
                 if not user_exists:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail='User does not exist',
-                        )
-                
+                    )
+
                 role_exists = await role_dal.get(role_id)
                 if not role_exists:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail='Role does not exist',
-                        )
-                
+                    )
+
                 try:
                     new_user_role = await user_role_dal.create(user_id, role_id)
                     return bool(new_user_role)
-                except:
+                except Exception:
                     return
 
     async def remove_role_from_user(self, user_id: uuid.UUID, role_id: uuid.UUID) -> bool:
@@ -177,25 +177,25 @@ class RoleService(RoleServiceBase):
             async with session.begin():
                 role_dal = RoleDAL(session)
                 user_dal = UserDAL(session)
-                
+
                 user_exists = await user_dal.get(user_id)
                 if not user_exists:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail='User does not exist',
-                        )
-                
+                    )
+
                 role_exists = await role_dal.get(role_id)
                 if not role_exists:
                     raise HTTPException(
                         status_code=status.HTTP_404_NOT_FOUND,
                         detail='Role does not exist',
-                        )
-                
+                    )
+
                 try:
                     await role_dal.delete_by_user_id_and_role_id(user_id, role_id)
                     return True
-                except:
+                except Exception:
                     return
 
 
