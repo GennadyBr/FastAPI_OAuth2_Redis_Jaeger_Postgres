@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any, Coroutine
 
 import backoff
 from redis.asyncio import Redis
@@ -25,10 +24,10 @@ class TokenDBBase(ABC):
 class TokenDB(TokenDBBase):
     def __init__(self, host: str, port: int, password: str) -> None:
         self.redis = Redis(host=host, port=port, password=password)
-    
+
     @backoff.on_exception(backoff.expo,
                           (RedisConnectionError),
-                          max_tries=5, 
+                          max_tries=5,
                           raise_on_giveup=True,
                           )
     async def put(self, token: str, user_id: str, expire_in_sec: int) -> None:
@@ -37,17 +36,17 @@ class TokenDB(TokenDBBase):
 
     @backoff.on_exception(backoff.expo,
                           (RedisConnectionError),
-                          max_tries=5, 
+                          max_tries=5,
                           raise_on_giveup=True,
                           )
     async def is_exist(self, token: str) -> bool:
         is_exist = await self.redis.exists(token)
         return is_exist
 
-   
+
 @backoff.on_exception(backoff.expo,
                       (RedisConnectionError),
-                      max_tries=5, 
+                      max_tries=5,
                       raise_on_giveup=True,
                       )
 async def get_token_db() -> TokenDBBase:

@@ -2,12 +2,8 @@ import argparse
 import psycopg2
 from psycopg2 import Error
 import uuid
-import os
-# from dotenv import load_dotenv
 import bcrypt
 from core.config import user_db_settings
-
-# load_dotenv()
 
 if __name__ == '__main__':
     SUPER_USER = 'super_user'
@@ -24,10 +20,10 @@ if __name__ == '__main__':
     try:
         # Подключиться к существующей базе данных
         with psycopg2.connect(user=user_db_settings.user,
-                                      password=user_db_settings.password.get_secret_value(),
-                                      host=user_db_settings.service_name,
-                                      port=user_db_settings.port,
-                                      database=user_db_settings.name) as connection:
+                              password=user_db_settings.password.get_secret_value(),
+                              host=user_db_settings.service_name,
+                              port=user_db_settings.port,
+                              database=user_db_settings.name) as connection:
 
             cursor = connection.cursor()
 
@@ -35,7 +31,8 @@ if __name__ == '__main__':
             pwd_hash = bcrypt.hashpw(args.password.encode('utf-8'), salt)
 
             # добавление пользователя в таблицу user
-            query = """ INSERT INTO users (uuid, name, surname, login, email, is_active, password) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
+            query = " INSERT INTO users (uuid, name, surname, login, email, is_active, password) " \
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s)"
             user_id = str(uuid.uuid4())
             params = (user_id, args.name, args.surname, args.login, args.email, True, pwd_hash)
             cursor.execute(query, params)

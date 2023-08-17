@@ -18,8 +18,7 @@ from crud.base_classes import CrudBase
 # BLOCK FOR INTERACTION WITH DATABASE IN BUSINESS CONTEXT #
 ###########################################################
 
-class EntryDAL(
-    CrudBase):  # Entry Data Access Layer создание, удаление и все остальные функции взаимодействия с пользователем
+class EntryDAL(CrudBase):
     """Data Access Layer for operation CRUD"""
 
     def __init__(self, db_session: AsyncSession):
@@ -40,7 +39,6 @@ class EntryDAL(
             log.error("Ошибка: ", err)
             log.error("Тип ошибки: ", type(err))
             return err
-
 
     #  where(and_(Entry.uuid == id, Entry.is_active == True)). \
     async def delete(self, id: Union[str, UUID]) -> Union[UUID, None, Exception]:
@@ -86,7 +84,10 @@ class EntryDAL(
             log.error("Тип ошибки: ", type(err))
             return err
 
-    async def get_by_user_id(self, user_id: UUID, unique: bool = False, only_active: bool = False) -> Optional[Union[List[Entry], None, Exception]]:
+    async def get_by_user_id(self,
+                             user_id: UUID,
+                             unique: bool = False,
+                             only_active: bool = False) -> Optional[Union[List[Entry], None, Exception]]:
         try:
             query = select(Entry).where(Entry.user_id == user_id)
             if only_active:
@@ -101,7 +102,9 @@ class EntryDAL(
             log.error("Тип ошибки: ", type(err))
             return err
 
-    async def get_by_user_agent(self, user_agent: str, only_active: bool = False) -> Optional[Union[Entry, None, Exception]]:
+    async def get_by_user_agent(self,
+                                user_agent: str,
+                                only_active: bool = False) -> Optional[Union[Entry, None, Exception]]:
         try:
             query = select(Entry).where(Entry.user_agent == user_agent)
             if only_active:

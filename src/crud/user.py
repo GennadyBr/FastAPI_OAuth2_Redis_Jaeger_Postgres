@@ -18,8 +18,7 @@ from crud.base_classes import CrudBase
 # BLOCK FOR INTERACTION WITH DATABASE IN BUSINESS CONTEXT #
 ###########################################################
 
-class UserDAL(
-    CrudBase):  # User Data Access Layer создание, удаление и все остальные функции взаимодействия с пользователем
+class UserDAL(CrudBase):
     """Data Access Layer for operation user CRUD"""
 
     def __init__(self, db_session: AsyncSession):
