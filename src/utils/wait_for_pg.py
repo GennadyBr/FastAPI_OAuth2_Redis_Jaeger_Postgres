@@ -5,13 +5,13 @@ import time
 
 import backoff
 import psycopg2
-from core.config import user_db_settings
-from core.logger import LOGGING
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
+from core.config import user_db_settings
+from core.logger import LOGGING
 
 logging.config.dictConfig(LOGGING)
 logging.getLogger(__name__)
