@@ -5,6 +5,13 @@ from typing import List, Optional
 
 from fastapi import status, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import exc
+
+import logging.config
+from core.logger import LOGGING
+
+logging.config.dictConfig(LOGGING)
+log = logging.getLogger(__name__)
 
 from crud.role import RoleDAL
 from crud.user_role import UserRoleDAL
@@ -65,8 +72,15 @@ class RoleService(RoleServiceBase):
                 try:
                     role = await role_dal.create(name=role_name)
                     return RoleResponse(uuid=role.uuid, name=role.name)
+<<<<<<< HEAD
                 except Exception:
                     return
+=======
+                except exc.SQLAlchemyError as err:
+                    log.error("Insert query error", err)
+                except Exception as err:
+                    log.error("Unknown error", err)
+>>>>>>> 34068e8 (exception at services/auth and role)
 
     async def read_role(self, role_id: uuid.UUID) -> Optional[RoleResponse]:
         async with self.db as session:
@@ -81,8 +95,15 @@ class RoleService(RoleServiceBase):
                 try:
                     role = await role_dal.get(id=role_id)
                     return RoleResponse(uuid=role.uuid, name=role.name)
+<<<<<<< HEAD
                 except Exception:
                     return
+=======
+                except exc.SQLAlchemyError as err:
+                    log.error("Insert query error", err)
+                except Exception as err:
+                    log.error("Unknown error", err)
+>>>>>>> 34068e8 (exception at services/auth and role)
 
     async def read_roles(self) -> Optional[List[RoleResponse]]:
         async with self.db as session:
@@ -91,8 +112,15 @@ class RoleService(RoleServiceBase):
                 try:
                     roles = await role_dal.get_all()
                     return [RoleResponse(uuid=role.uuid, name=role.name) for role in roles]
+<<<<<<< HEAD
                 except Exception:
                     return
+=======
+                except exc.SQLAlchemyError as err:
+                    log.error("Insert query error", err)
+                except Exception as err:
+                    log.error("Unknown error", err)
+>>>>>>> 34068e8 (exception at services/auth and role)
 
     async def update_role(self, role_id: uuid.UUID, name: str) -> Optional[RoleResponse]:
         async with self.db as session:
@@ -106,8 +134,15 @@ class RoleService(RoleServiceBase):
                     )
                 try:
                     updated_role_id = await role_dal.update(id=role_id, name=name)
+<<<<<<< HEAD
                 except Exception:
                     return
+=======
+                except exc.SQLAlchemyError as err:
+                    log.error("Insert query error", err)
+                except Exception as err:
+                    log.error("Unknown error", err)
+>>>>>>> 34068e8 (exception at services/auth and role)
 
         updated_role = await self.read_role(updated_role_id)
         return updated_role
@@ -125,8 +160,15 @@ class RoleService(RoleServiceBase):
                 try:
                     deleted_role_id = await role_dal.delete(uuid=role_id)
                     return bool(deleted_role_id)
+<<<<<<< HEAD
                 except Exception:
                     return
+=======
+                except exc.SQLAlchemyError as err:
+                    log.error("Insert query error", err)
+                except Exception as err:
+                    log.error("Unknown error", err)
+>>>>>>> 34068e8 (exception at services/auth and role)
 
     async def get_user_access_area(self, user_id: uuid.UUID) -> List[RoleResponse]:
         async with self.db as session:
@@ -142,8 +184,15 @@ class RoleService(RoleServiceBase):
                 try:
                     user_roles = await role_dal.get_by_user_id(user_id)
                     return [RoleResponse(uuid=role.uuid, name=role.name) for role in user_roles]
+<<<<<<< HEAD
                 except Exception:
                     return
+=======
+                except exc.SQLAlchemyError as err:
+                    log.error("Insert query error", err)
+                except Exception as err:
+                    log.error("Unknown error", err)
+>>>>>>> 34068e8 (exception at services/auth and role)
 
     async def set_role_to_user(self, user_id: uuid.UUID, role_id: uuid.UUID) -> bool:
         async with self.db as session:
@@ -169,8 +218,15 @@ class RoleService(RoleServiceBase):
                 try:
                     new_user_role = await user_role_dal.create(user_id, role_id)
                     return bool(new_user_role)
+<<<<<<< HEAD
                 except Exception:
                     return
+=======
+                except exc.SQLAlchemyError as err:
+                    log.error("Insert query error", err)
+                except Exception as err:
+                    log.error("Unknown error", err)
+>>>>>>> 34068e8 (exception at services/auth and role)
 
     async def remove_role_from_user(self, user_id: uuid.UUID, role_id: uuid.UUID) -> bool:
         async with self.db as session:
@@ -195,8 +251,15 @@ class RoleService(RoleServiceBase):
                 try:
                     await role_dal.delete_by_user_id_and_role_id(user_id, role_id)
                     return True
+<<<<<<< HEAD
                 except Exception:
                     return
+=======
+                except exc.SQLAlchemyError as err:
+                    log.error("Insert query error", err)
+                except Exception as err:
+                    log.error("Unknown error", err)
+>>>>>>> 34068e8 (exception at services/auth and role)
 
 
 @lru_cache()

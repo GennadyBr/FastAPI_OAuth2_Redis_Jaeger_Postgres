@@ -8,7 +8,9 @@ ENV PYTHONUNBUFFERED 1
 COPY requirements.txt requirements.txt
 
 RUN  pip3 install --no-cache-dir --upgrade pip \
-     && pip3 install --no-cache-dir -r requirements.txt
+     && pip3 install --no-cache-dir -r requirements.txt \
+     && apt-get update && apt-get -y install vim
+
 
 COPY /src .
 COPY gunicorn.conf.py gunicorn.conf.py
