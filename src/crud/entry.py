@@ -1,7 +1,7 @@
 from uuid import UUID
 from typing import Union, Optional, List
 
-from sqlalchemy import update, tuple_, select
+from sqlalchemy import update, tuple_, select, exc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import logging.config
@@ -35,9 +35,11 @@ class EntryDAL(CrudBase):
             self.db_session.add(new_entry)
             await self.db_session.commit()
             return new_entry
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     #  where(and_(Entry.uuid == id, Entry.is_active == True)). \
@@ -51,9 +53,11 @@ class EntryDAL(CrudBase):
             deleted_entry_id_row = res.fetchone()
             if deleted_entry_id_row is not None:
                 return deleted_entry_id_row[0]
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def get(self, id: UUID) -> Union[Entry, None, Exception]:
@@ -63,9 +67,11 @@ class EntryDAL(CrudBase):
             entry_row = res.fetchone()
             if entry_row is not None:
                 return entry_row[0]
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def update(self, id: UUID, **kwargs) -> Union[UUID, None, Exception]:
@@ -79,9 +85,11 @@ class EntryDAL(CrudBase):
             update_entry_id_row = res.fetchone()
             if update_entry_id_row is not None:
                 return update_entry_id_row[0]
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def get_by_user_id(self,
@@ -97,9 +105,11 @@ class EntryDAL(CrudBase):
             res = await self.db_session.execute(query)
             entries = res.scalars().fetchall()
             return entries
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def get_by_user_agent(self,
@@ -113,7 +123,9 @@ class EntryDAL(CrudBase):
             entry_row = res.fetchone()
             if entry_row is not None:
                 return entry_row[0]
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err

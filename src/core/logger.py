@@ -1,5 +1,5 @@
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-LOG_DEFAULT_HANDLERS = ['console', ]
+LOG_DEFAULT_HANDLERS = ['console', 'file', ]
 
 LOGGING = {
     'version': 1,
@@ -24,6 +24,14 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': 'logconfig.log',
+            'maxBytes': 102400,
+            'backupCount': 30,
+        },
         'default': {
             'formatter': 'default',
             'class': 'logging.StreamHandler',
@@ -38,7 +46,7 @@ LOGGING = {
     'loggers': {
         '': {
             'handlers': LOG_DEFAULT_HANDLERS,
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'uvicorn.error': {
             'level': 'INFO',

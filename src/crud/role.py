@@ -1,7 +1,7 @@
 from uuid import UUID
 from typing import Union, Optional, List
 
-from sqlalchemy import update, select
+from sqlalchemy import update, select, exc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import logging.config
@@ -33,9 +33,11 @@ class RoleDAL(CrudBase):
             self.db_session.add(new_role)  # добавление в сессию новой роли
             await self.db_session.commit()  # добавление в Постгресс новой роли
             return new_role
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def delete(self, uuid: Union[str, UUID]) -> Union[UUID, None, Exception]:
@@ -44,9 +46,11 @@ class RoleDAL(CrudBase):
             await self.db_session.delete(role)
             await self.db_session.commit()
             return role.uuid
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def get(self, id: UUID) -> Union[Role, None, Exception]:
@@ -56,9 +60,11 @@ class RoleDAL(CrudBase):
             role_row = res.fetchone()
             if role_row is not None:
                 return role_row[0]
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def update(self, id: UUID, **kwargs) -> Union[UUID, None, Exception]:
@@ -69,9 +75,11 @@ class RoleDAL(CrudBase):
             await self.db_session.commit()
             if update_role_id_row is not None:
                 return update_role_id_row[0]
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def get_by_user_id(self, user_id: UUID) -> Optional[Union[List[Role], Exception]]:
@@ -83,9 +91,11 @@ class RoleDAL(CrudBase):
             res = await self.db_session.execute(query)
             role_rows = res.scalars().fetchall()
             return role_rows
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def get_by_name(self, name: str) -> Union[Role, None]:
@@ -95,9 +105,11 @@ class RoleDAL(CrudBase):
             role_row = res.fetchone()
             if role_row is not None:
                 return role_row[0]
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def get_all(self) -> Union[List[Role], None, Exception]:
@@ -107,9 +119,11 @@ class RoleDAL(CrudBase):
             role_rows = res.fetchall()
             if role_rows:
                 return [row[0] for row in role_rows]
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
 
     async def delete_by_user_id_and_role_id(self,
@@ -126,7 +140,9 @@ class RoleDAL(CrudBase):
                 user_role = await self.db_session.get(UserRole, role_rows[0].uuid)
                 await self.db_session.delete(user_role)
                 await self.db_session.commit()
+        except exc.SQLAlchemyError as err:
+            log.error("Insert query error", err)
+            return err
         except Exception as err:
-            log.error("Ошибка: ", err)
-            log.error("Тип ошибки: ", type(err))
+            log.error("Unknown error: ", err)
             return err
