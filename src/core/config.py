@@ -9,7 +9,6 @@ logging_config.dictConfig(LOGGING)
 
 class APPSettings(BaseSettings):
     project_name: str = 'Auth API'
-    # base_dir: Path = Path(__file__).resolve(strict=True).parent.parent
     log_lvl: str = 'DEBUG'
 
 

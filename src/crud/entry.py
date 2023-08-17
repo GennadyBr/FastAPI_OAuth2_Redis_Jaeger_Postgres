@@ -40,7 +40,6 @@ class EntryDAL(CrudBase):
             log.error("Тип ошибки: ", type(err))
             return err
 
-    #  where(and_(Entry.uuid == id, Entry.is_active == True)). \
     async def delete(self, id: Union[str, UUID]) -> Union[UUID, None, Exception]:
         try:
             query = update(Entry). \
