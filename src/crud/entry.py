@@ -26,6 +26,8 @@ class EntryDAL(CrudBase):
 
     async def create(self, user_id: UUID, user_agent: str, refresh_token: str) -> Union[Entry, Exception]:
         """Create Entry"""
+        log_message = f"CRUD Create Entry: user_id={user_id}, user_agent={user_agent}, refresh_token={refresh_token}"
+        log.info(log_message)
         try:
             new_entry = Entry(
                 user_id=user_id,
@@ -44,6 +46,9 @@ class EntryDAL(CrudBase):
 
     #  where(and_(Entry.uuid == id, Entry.is_active == True)). \
     async def delete(self, id: Union[str, UUID]) -> Union[UUID, None, Exception]:
+        """Delete Entry"""
+        log_message = f"CRUD Delete Entry: id={id}"
+        log.info(log_message)
         try:
             query = update(Entry). \
                 where(Entry.uuid == id). \
@@ -61,6 +66,9 @@ class EntryDAL(CrudBase):
             return err
 
     async def get(self, id: UUID) -> Union[Entry, None, Exception]:
+        """Get Entry"""
+        log_message = f"CRUD Get Entry: id={id}"
+        log.info(log_message)
         try:
             query = select(Entry).where(Entry.uuid == id)
             res = await self.db_session.execute(query)
@@ -75,6 +83,9 @@ class EntryDAL(CrudBase):
             return err
 
     async def update(self, id: UUID, **kwargs) -> Union[UUID, None, Exception]:
+        """Update Entry"""
+        log_message = f"CRUD Update Entry: id={id}"
+        log.info(log_message)
         try:
             query = update(Entry). \
                 where(Entry.uuid == id). \
@@ -96,6 +107,9 @@ class EntryDAL(CrudBase):
                              user_id: UUID,
                              unique: bool = False,
                              only_active: bool = False) -> Optional[Union[List[Entry], None, Exception]]:
+        """Get Entry User by id"""
+        log_message = f"CRUD Get Entry User by id: user_id={user_id}, unique={unique}, only_active={only_active}"
+        log.info(log_message)
         try:
             query = select(Entry).where(Entry.user_id == user_id)
             if only_active:
@@ -115,6 +129,9 @@ class EntryDAL(CrudBase):
     async def get_by_user_agent(self,
                                 user_agent: str,
                                 only_active: bool = False) -> Optional[Union[Entry, None, Exception]]:
+        """Get Entry by User_agent"""
+        log_message = f"CRUD Get Entry by User_agent: user_agent={user_agent}, only_active={only_active}"
+        log.info(log_message)
         try:
             query = select(Entry).where(Entry.user_agent == user_agent)
             if only_active:

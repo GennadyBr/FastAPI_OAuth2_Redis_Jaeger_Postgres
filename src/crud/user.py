@@ -26,8 +26,10 @@ class UserDAL(CrudBase):
 
     async def create(
             self, name: str, surname: str, login: str, email: str, password: str) -> Union[User, Exception]:
+        """Create User"""
+        log_message = f"CRUD Create User: name={name}, surname={surname}, login={login}, email={email}, password={password}"
+        log.info(log_message)
         try:
-            """Create User"""
             new_user = User(
                 name=name,
                 surname=surname,
@@ -46,6 +48,9 @@ class UserDAL(CrudBase):
             return err
 
     async def delete(self, id: Union[str, UUID]) -> Union[UUID, None, Exception]:
+        """Delete User"""
+        log_message = f"CRUD Delete User: id={id}"
+        log.info(log_message)
         try:
             query = update(User). \
                 where(and_(User.uuid == id, User.is_active == True)). \
@@ -63,6 +68,9 @@ class UserDAL(CrudBase):
             return err
 
     async def get(self, id: UUID) -> Union[User, None, Exception]:
+        """Get User"""
+        log_message = f"CRUD Get User: id={id}"
+        log.info(log_message)
         try:
             query = select(User).where(User.uuid == id)
             res = await self.db_session.execute(query)
@@ -77,6 +85,9 @@ class UserDAL(CrudBase):
             return err
 
     async def update(self, id: UUID, **kwargs) -> Union[UUID, None, Exception]:
+        """Update User"""
+        log_message = f"CRUD Update User: id={id}, {kwargs}"
+        log.info(log_message)
         try:
             query = update(User). \
                 where(User.uuid == id). \
@@ -95,6 +106,9 @@ class UserDAL(CrudBase):
             return err
 
     async def get_by_email(self, email: str) -> Union[User, None, Exception]:
+        """Get User by Email"""
+        log_message = f"CRUD Get User by Email: email={email}"
+        log.info(log_message)
         try:
             query = select(User).where(User.email == email)
             res = await self.db_session.execute(query)
@@ -109,6 +123,9 @@ class UserDAL(CrudBase):
             return err
 
     async def get_by_login(self, login: str) -> Union[User, None, Exception]:
+        """Get User by Login"""
+        log_message = f"CRUD Get User by Login: login={login}"
+        log.info(log_message)
         try:
             query = select(User).where(User.login == login)
             res = await self.db_session.execute(query)

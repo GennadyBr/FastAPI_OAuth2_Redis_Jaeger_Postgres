@@ -26,6 +26,9 @@ class RoleDAL(CrudBase):
         self.db_session = db_session
 
     async def create(self, name: str) -> Union[Role, Exception]:
+        """Create Role"""
+        log_message = f"CRUD Create Role: name={name}"
+        log.info(log_message)
         try:
             new_role = Role(
                 name=name,
@@ -41,6 +44,9 @@ class RoleDAL(CrudBase):
             return err
 
     async def delete(self, uuid: Union[str, UUID]) -> Union[UUID, None, Exception]:
+        """Delete Role"""
+        log_message = f"CRUD Delete Role: uuid={uuid}"
+        log.info(log_message)
         try:
             role = await self.db_session.get(Role, uuid)
             await self.db_session.delete(role)
@@ -54,6 +60,9 @@ class RoleDAL(CrudBase):
             return err
 
     async def get(self, id: UUID) -> Union[Role, None, Exception]:
+        """Get Role"""
+        log_message = f"CRUD Get Role: id={id}"
+        log.info(log_message)
         try:
             query = select(Role).where(Role.uuid == id)
             res = await self.db_session.execute(query)
@@ -68,6 +77,9 @@ class RoleDAL(CrudBase):
             return err
 
     async def update(self, id: UUID, **kwargs) -> Union[UUID, None, Exception]:
+        """Update Role"""
+        log_message = f"CRUD Update Role: id={id}"
+        log.info(log_message)
         try:
             query = update(Role).where(Role.uuid == id).values(kwargs).returning(Role.uuid)
             res = await self.db_session.execute(query)
@@ -83,6 +95,9 @@ class RoleDAL(CrudBase):
             return err
 
     async def get_by_user_id(self, user_id: UUID) -> Optional[Union[List[Role], Exception]]:
+        """Get Role by User id"""
+        log_message = f"CRUD Get Role by User id: user_id={user_id}"
+        log.info(log_message)
         try:
             query = select(Role). \
                 join(UserRole, Role.uuid == UserRole.role_id). \
@@ -99,6 +114,9 @@ class RoleDAL(CrudBase):
             return err
 
     async def get_by_name(self, name: str) -> Union[Role, None]:
+        """Get Role by Name"""
+        log_message = f"CRUD Get Role by Name: name={name}"
+        log.info(log_message)
         try:
             query = select(Role).where(Role.name == name)
             res = await self.db_session.execute(query)
@@ -129,6 +147,9 @@ class RoleDAL(CrudBase):
     async def delete_by_user_id_and_role_id(self,
                                             user_id: UUID,
                                             role_id: UUID) -> Optional[Union[List[Role], Exception]]:
+        """Delete Role by User id and Role id"""
+        log_message = f"CRUD Delete Role by User id and Role id: user_id={user_id} and role_id={role_id}"
+        log.info(log_message)
         try:
             query = select(UserRole). \
                 join(Role, Role.uuid == UserRole.role_id). \
