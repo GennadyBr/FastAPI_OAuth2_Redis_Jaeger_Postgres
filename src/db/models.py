@@ -18,19 +18,19 @@ class User(Base):
     __tablename__ = 'users'
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String, nullable=False)
-    surname = Column(String, nullable=False)
-    login = Column(String, nullable=False, unique=True)
-    email = Column(String, nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
+    surname = Column(String(100), nullable=False)
+    login = Column(String(100), nullable=False, unique=True)
+    email = Column(String(100), nullable=False, unique=True)
     is_active = Column(Boolean(), default=True)
-    password = Column(String, nullable=False)
+    password = Column(String(100), nullable=False)
 
 
 class Role(Base):
     __tablename__ = 'role'
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String, nullable=False, unique=True)  # я подумал что название ролей должно быть уникальным
+    name = Column(String(100), nullable=False, unique=True)   # я подумал что название ролей должно быть уникальным
 
 
 class Entry(Base):
@@ -38,9 +38,9 @@ class Entry(Base):
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey(User.uuid), nullable=False)
-    user_agent = Column(String)
+    user_agent = Column(String(100))
     date_time = Column(DateTime, default=datetime.utcnow, nullable=False)
-    refresh_token = Column(String)
+    refresh_token = Column(String(100))
     is_active = Column(Boolean(), default=True)
 
 
