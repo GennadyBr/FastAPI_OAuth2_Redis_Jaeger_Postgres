@@ -168,3 +168,4 @@ class EntryDAL(CrudBase):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail='CRUD Entry Get by user_agent Unknown Error',
             )
+qqq
