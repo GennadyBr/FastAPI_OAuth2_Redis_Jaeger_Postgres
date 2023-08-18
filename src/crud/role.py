@@ -1,6 +1,7 @@
 from uuid import UUID
 from typing import Union, Optional, List
 
+from fastapi import status, HTTPException
 from sqlalchemy import update, select, exc
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -34,11 +35,17 @@ class RoleDAL(CrudBase):
             await self.db_session.commit()  # добавление в Постгресс новой роли
             return new_role
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Create query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Create query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Create Unknown Error',
+            )
 
     async def delete(self, uuid: Union[str, UUID]) -> Union[UUID, None, Exception]:
         try:
@@ -47,11 +54,17 @@ class RoleDAL(CrudBase):
             await self.db_session.commit()
             return role.uuid
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Delete query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Delete query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Delete Unknown Error',
+            )
 
     async def get(self, id: UUID) -> Union[Role, None, Exception]:
         try:
@@ -61,11 +74,17 @@ class RoleDAL(CrudBase):
             if role_row is not None:
                 return role_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Get query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Get query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Get Unknown Error',
+            )
 
     async def update(self, id: UUID, **kwargs) -> Union[UUID, None, Exception]:
         try:
@@ -76,11 +95,17 @@ class RoleDAL(CrudBase):
             if update_role_id_row is not None:
                 return update_role_id_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Update query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Update query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Update Unknown Error',
+            )
 
     async def get_by_user_id(self, user_id: UUID) -> Optional[Union[List[Role], Exception]]:
         try:
@@ -92,11 +117,17 @@ class RoleDAL(CrudBase):
             role_rows = res.scalars().fetchall()
             return role_rows
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Get by user_id query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Get by user_id query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Get by user_id Unknown Error',
+            )
 
     async def get_by_name(self, name: str) -> Union[Role, None]:
         try:
@@ -106,11 +137,17 @@ class RoleDAL(CrudBase):
             if role_row is not None:
                 return role_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Get by name query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Get by name query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Get by name Unknown Error',
+            )
 
     async def get_all(self) -> Union[List[Role], None, Exception]:
         try:
@@ -120,11 +157,17 @@ class RoleDAL(CrudBase):
             if role_rows:
                 return [row[0] for row in role_rows]
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Get all query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Get all query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Get all Unknown Error',
+            )
 
     async def delete_by_user_id_and_role_id(self,
                                             user_id: UUID,
@@ -141,8 +184,14 @@ class RoleDAL(CrudBase):
                 await self.db_session.delete(user_role)
                 await self.db_session.commit()
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Delete by user_id and role_id query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Delete by user_id and role_id query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD Role Delete by user_id and role_id Unknown Error',
+            )

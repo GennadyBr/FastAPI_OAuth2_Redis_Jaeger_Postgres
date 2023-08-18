@@ -1,6 +1,7 @@
 from uuid import UUID
 from typing import Union
 
+from fastapi import status, HTTPException
 from sqlalchemy import update, and_, select, exc
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -39,11 +40,17 @@ class UserDAL(CrudBase):
             await self.db_session.commit()
             return new_user
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Create query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Create query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Create Unknown Error',
+            )
 
     async def delete(self, id: Union[str, UUID]) -> Union[UUID, None, Exception]:
         try:
@@ -56,11 +63,17 @@ class UserDAL(CrudBase):
             if deleted_user_id_row is not None:
                 return deleted_user_id_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Delete query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Delete query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Delete Unknown Error',
+            )
 
     async def get(self, id: UUID) -> Union[User, None, Exception]:
         try:
@@ -70,11 +83,17 @@ class UserDAL(CrudBase):
             if user_row is not None:
                 return user_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Get query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Get query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Get Unknown Error',
+            )
 
     async def update(self, id: UUID, **kwargs) -> Union[UUID, None, Exception]:
         try:
@@ -88,11 +107,17 @@ class UserDAL(CrudBase):
             if update_user_id_row is not None:
                 return update_user_id_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Update query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Update query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Update Unknown Error',
+            )
 
     async def get_by_email(self, email: str) -> Union[User, None, Exception]:
         try:
@@ -102,11 +127,17 @@ class UserDAL(CrudBase):
             if user_row is not None:
                 return user_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Get by email query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Get by email query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Get by email Unknown Error',
+            )
 
     async def get_by_login(self, login: str) -> Union[User, None, Exception]:
         try:
@@ -116,8 +147,14 @@ class UserDAL(CrudBase):
             if user_row is not None:
                 return user_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Insert query error", err)
-            return err
+            log.error("Get by login query error", err)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Get by login query SQLAlchemyError',
+            )
         except Exception as err:
             log.error("Unknown error: ", err)
-            return err
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='CRUD User Get by login Unknown Error',
+            )
