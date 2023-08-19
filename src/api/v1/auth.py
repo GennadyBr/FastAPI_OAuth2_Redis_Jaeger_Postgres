@@ -1,13 +1,20 @@
 from typing import List, Annotated
+import logging
 
 from fastapi import APIRouter, Depends, Header, Response, Cookie, Query
 
+from core.logger import LOGGING
 from core.config import token_settings
 from .models import UserCreateRequest, ChangeUserPwdRequest, ChangeUserDataRequest, UserResponse, LoginRequest, \
     EntryResponse
 from models.user import UserCreate, ChangeUserData, ChangeUserPwd
 from utils.token_manager import verify_access_token, verify_refresh_token
 from services.auth import AuthServiceBase, get_auth_service
+
+
+logging.config.dictConfig(LOGGING)
+log = logging.getLogger(__name__)
+
 
 router = APIRouter(prefix='/auth')
 
@@ -36,10 +43,13 @@ async def login(user: LoginRequest,
                 auth_service: AuthServiceBase = Depends(get_auth_service),
                 user_agent: str = Header(include_in_schema=False),
                 ) -> str:
+    log_msg = f'Login: {user}'
+    log.debug(log_msg)
     access_token, refresh_token = await auth_service.login(login=user.login,
                                                            pwd=user.password,
                                                            user_agent=user_agent,
                                                            )
+    log.debug('Set refresh token cookie')
     response.set_cookie(key=token_settings.refresh_token_cookie_name,
                         value=refresh_token,
                         httponly=True,
@@ -59,8 +69,11 @@ async def refresh(response: Response,
                   refresh_token: str = Depends(verify_refresh_token),
                   user_agent: str = Header(include_in_schema=False),
                   ) -> str:
+    log_msg = f'Refresh: {refresh_token}'
+    log.debug(log_msg)
     new_access_token, new_refresh_token = await auth_service.refresh_tokens(refresh_token=refresh_token,
                                                                             user_agent=user_agent)
+    log.debug('Set refresh token cookie')
     response.set_cookie(key=token_settings.refresh_token_cookie_name,
                         value=new_refresh_token,
                         httponly=True,
@@ -123,6 +136,7 @@ async def logout(response: Response,
                  auth_service: AuthServiceBase = Depends(get_auth_service),
                  ) -> None:
     await auth_service.logout(access_token, refresh_token, user_agent)
+    log.debug('Delete refresh cookie')
     response.delete_cookie(token_settings.refresh_token_cookie_name)
 
 
@@ -136,6 +150,7 @@ async def logout_all(response: Response,
                      auth_service: AuthServiceBase = Depends(get_auth_service),
                      ) -> None:
     await auth_service.logout_all(token)
+    log.debug('Delete refresh cookie')
     response.delete_cookie(token_settings.refresh_token_cookie_name)
 
 
@@ -150,10 +165,13 @@ async def change_pwd(changed_pwd_data: ChangeUserPwdRequest,
                      refresh_token: Annotated[str, Cookie(include_in_schema=False)] = None,
                      auth_service: AuthServiceBase = Depends(get_auth_service),
                      ) -> None:
+    log_msg = f'Cahnge pwd: {changed_pwd_data}'
+    log.debug(log_msg)
     await auth_service.update_user_password(access_token,
                                             refresh_token,
                                             ChangeUserPwd(**changed_pwd_data.dict(exclude={'new_password_repeat'})),
                                             )
+    log.debug('Delete refresh cookie')
     response.delete_cookie(token_settings.refresh_token_cookie_name)
 
 
@@ -167,6 +185,8 @@ async def change_user_data(changed_user_data: ChangeUserDataRequest,
                            token: str = Depends(verify_access_token),
                            auth_service: AuthServiceBase = Depends(get_auth_service),
                            ) -> UserResponse:
+    log_msg = f'Change user data: {changed_user_data}'
+    log.debug(log_msg)
     updated_user = await auth_service.update_user_data(token, ChangeUserData(**changed_user_data.dict()))
     return UserResponse.from_orm(updated_user)
 
@@ -180,5 +200,8 @@ async def deactivate_user(response: Response,
                           token: str = Depends(verify_access_token),
                           auth_service: AuthServiceBase = Depends(get_auth_service),
                           ) -> None:
+    log_msg = f'Deactivate user: {deactivate_user}'
+    log.debug(log_msg)
     await auth_service.deactivate_user(token)
+    log.debug('Delete refresh cookie')
     response.delete_cookie(token_settings.refresh_token_cookie_name)
