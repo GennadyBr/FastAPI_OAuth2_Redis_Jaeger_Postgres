@@ -25,9 +25,9 @@ class EntryDAL(CrudBase):
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def create(self, user_id: UUID, user_agent: str, refresh_token: str) -> Union[Entry, Exception]:
+    async def create(self, user_id: UUID, user_agent: str, refresh_token: str) -> Optional[Entry]:
         """Create Entry"""
-        log_message = f"CRUD Create Entry: user_id={user_id}, user_agent={user_agent}, refresh_token={refresh_token}"
+        log_message = f'CRUD Create Entry: user_id={user_id}, user_agent={user_agent}, refresh_token={refresh_token}'
         log.debug(log_message)
         new_entry = Entry(
             user_id=user_id,
@@ -39,23 +39,23 @@ class EntryDAL(CrudBase):
             await self.db_session.commit()
             return new_entry
         except exc.SQLAlchemyError as err:
-            log_message = f"new_entry error: <{new_entry.__dict__}>"
+            log_message = f'Create entry error: {new_entry.__dict__}'
             log.error(log_message)
             log.error(err)
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Create SQLAlchemyError',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail='Error creating entry',
             )
         except Exception as err:
-            log.error("CRUD Entry Create Unknown Error: ", err)
+            log.error('CRUD Entry Create Unknown Error', exc_info=True)
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Create Unknown Error',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail='Error creating entry',
             )
 
-    async def delete(self, id: Union[str, UUID]) -> Union[UUID, None, Exception]:
+    async def delete(self, id: Union[str, UUID]) -> Optional[UUID]:
         """Delete Entry"""
-        log_message = f"CRUD Delete Entry: id={id}"
+        log_message = f'CRUD Delete Entry: id={id}'
         log.debug(log_message)
         try:
             query = update(Entry). \
@@ -67,21 +67,23 @@ class EntryDAL(CrudBase):
             if deleted_entry_id_row is not None:
                 return deleted_entry_id_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Delete query error", err)
+            log_message = f'Delete entry error: entry uuid = {id}'
+            log.error(log_message)
+            log.error(err)
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Delete SQLAlchemyError',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail='Error deleting entry',
             )
         except Exception as err:
-            log.error("CRUD Entry Delete Unknown Error: ", err)
+            log.error('CRUD Entry Delete Unknown Error', exc_info=True)
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Delete Unknown Error',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail='Error deleting entry',
             )
 
-    async def get(self, id: UUID) -> Union[Entry, None, Exception]:
+    async def get(self, id: UUID) -> Optional[Entry]:
         """Get Entry"""
-        log_message = f"CRUD Get Entry: id={id}"
+        log_message = f'CRUD Get Entry: id={id}'
         log.debug(log_message)
         try:
             query = select(Entry).where(Entry.uuid == id)
@@ -90,21 +92,15 @@ class EntryDAL(CrudBase):
             if entry_row is not None:
                 return entry_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Get query error", err)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Get SQLAlchemyError',
-            )
+            log_message = f'Get query error: entry uuid = {id}'
+            log.error(log_message)
+            log.error(err)
         except Exception as err:
-            log.error("CRUD Entry Get Unknown Error: ", err)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Get Unknown Error',
-            )
+            log.error('CRUD Entry Get Unknown Error', exc_info=True)
 
-    async def update(self, id: UUID, **kwargs) -> Union[UUID, None, Exception]:
+    async def update(self, id: UUID, **kwargs) -> Optional[UUID]:
         """Update Entry"""
-        log_message = f"CRUD Update Entry: id={id}"
+        log_message = f'CRUD Update Entry: id={id}'
         log.debug(log_message)
         try:
             query = update(Entry). \
@@ -117,16 +113,18 @@ class EntryDAL(CrudBase):
             if update_entry_id_row is not None:
                 return update_entry_id_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Update query error", err)
+            log_message = f'Update entry error: entry uuid = {id}'
+            log.error(log_message)
+            log.error(err)
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Update SQLAlchemyError',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail='Error updating entry',
             )
         except Exception as err:
-            log.error("CRUD Entry Update Unknown Error: ", err)
+            log.error('CRUD Entry Update Unknown Error', exc_info=True)
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Update Unknown Error',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail='Error updating entry',
             )
 
     async def get_by_user_id(self,
@@ -135,9 +133,9 @@ class EntryDAL(CrudBase):
                              only_active: bool = False,
                              page_size: int = None,
                              page_number: int = None,
-                             ) -> Optional[Union[List[Entry], None, Exception]]:
+                             ) -> Optional[List[Entry]]:
         """Get Entry User by id"""
-        log_message = f"CRUD Get Entry User by id: user_id={user_id}, unique={unique}, only_active={only_active}"
+        log_message = f'CRUD Get Entry User by id: user_id={user_id}, unique={unique}, only_active={only_active}'
         log.debug(log_message)
         try:
             query = select(Entry).where(Entry.user_id == user_id)
@@ -153,23 +151,18 @@ class EntryDAL(CrudBase):
             entries = res.scalars().fetchall()
             return entries
         except exc.SQLAlchemyError as err:
-            log.error("Get by user_id query error", err)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Get by user_id query SQLAlchemyError',
-            )
+            log_message = f'Get entry by user uuid error: user uuid = {user_id}'
+            log.error(log_message)
+            log.error(err)
+
         except Exception as err:
-            log.error("CRUD Entry Get by user_id query Unknown Error: ", err)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Get by user_id query Unknown Error',
-            )
+            log.error('CRUD Entry Get by user_id query Unknown Error', exc_info=True)
 
     async def get_by_user_agent(self,
                                 user_agent: str,
                                 only_active: bool = False) -> Optional[Union[Entry, None, Exception]]:
         """Get Entry by User_agent"""
-        log_message = f"CRUD Get Entry by User_agent: user_agent={user_agent}, only_active={only_active}"
+        log_message = f'CRUD Get Entry by User_agent: user_agent={user_agent}, only_active={only_active}'
         log.debug(log_message)
         try:
             query = select(Entry).where(Entry.user_agent == user_agent)
@@ -180,14 +173,8 @@ class EntryDAL(CrudBase):
             if entry_row is not None:
                 return entry_row[0]
         except exc.SQLAlchemyError as err:
-            log.error("Get by user_agent query error", err)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Get by user_agent SQLAlchemyError',
-            )
+            log_message = f'Get entry by user agent error: user agent = {user_agent}'
+            log.error(log_message)
+            log.error(err)
         except Exception as err:
-            log.error("CRUD Entry Get by user_agent Unknown Error: ", err)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='CRUD Entry Get by user_agent Unknown Error',
-            )
+            log.error('CRUD Entry Get by user_agent Unknown Error', exc_info=True)
