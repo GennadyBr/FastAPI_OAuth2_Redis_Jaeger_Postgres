@@ -1,6 +1,7 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from pydantic import BaseModel
+
 
 class EntryCreate(BaseModel):
     user_id: UUID

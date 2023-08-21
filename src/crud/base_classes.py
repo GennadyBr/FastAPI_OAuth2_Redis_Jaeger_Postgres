@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Type
+from typing import Any
 from uuid import UUID
 from typing import Union
-from pydantic import BaseModel
 
 
 class CrudBase(ABC):
@@ -18,8 +17,7 @@ class CrudBase(ABC):
 
     @abstractmethod
     async def get(self, uuid: UUID) -> Any:
-        """получение записи из таблице"""
-
+        """получение записи из таблицы"""
 
     @abstractmethod
     async def update(self, uuid: UUID, **kwargs) -> Any:

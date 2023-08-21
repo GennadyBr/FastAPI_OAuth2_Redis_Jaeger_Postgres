@@ -1,7 +1,6 @@
 from logging import config as logging_config
-from pathlib import Path
 
-from pydantic import BaseSettings, AnyUrl, Field, SecretStr
+from pydantic import BaseSettings, AnyUrl, SecretStr
 
 from core.logger import LOGGING
 
@@ -10,7 +9,6 @@ logging_config.dictConfig(LOGGING)
 
 class APPSettings(BaseSettings):
     project_name: str = 'Auth API'
-    # base_dir: Path = Path(__file__).resolve(strict=True).parent.parent
     log_lvl: str = 'DEBUG'
 
 
@@ -48,6 +46,7 @@ class TokenSettings(BaseSettings):
     class Config:
         env_prefix = 'token_'
 
+
 class RedisSettings(BaseSettings):
     host: str = 'redis_token'
     port: int = 6379
@@ -55,6 +54,7 @@ class RedisSettings(BaseSettings):
 
     class Config:
         env_prefix = 'redis_'
+
 
 app_settings = APPSettings()
 token_settings = TokenSettings()
