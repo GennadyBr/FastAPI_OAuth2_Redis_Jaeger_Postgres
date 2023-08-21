@@ -10,7 +10,7 @@ from core.config import user_db_settings
 #############################################
 
 # create async engine for interaction with database
-engine = create_async_engine(user_db_settings.async_url, future=True, echo=True)
+engine = create_async_engine(user_db_settings.async_url, future=True, echo=False)
 
 # create session for interaction with database
 async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
