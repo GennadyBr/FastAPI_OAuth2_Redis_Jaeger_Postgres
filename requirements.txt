@@ -27,3 +27,9 @@ starlette-exporter==0.15.1
 backoff==2.2.1
 redis==4.6.0
 orjson==3.9.3
+
+# Jaeger
+opentelemetry-api==1.17.0
+opentelemetry-sdk==1.17.0
+opentelemetry-instrumentation-fastapi==0.38b0
+opentelemetry-exporter-jaeger==1.17.0
