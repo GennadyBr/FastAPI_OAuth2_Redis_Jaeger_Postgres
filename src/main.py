@@ -1,13 +1,15 @@
 import logging
+import uuid
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.responses import ORJSONResponse
 
 from api.v1.roles import router as role_router
 from api.v1.auth import router as auth_router
 from core.logger import LOGGING
 from core.config import app_settings
+from utils.limits import check_limit
 
 app = FastAPI(
     title=app_settings.project_name,
@@ -18,6 +20,18 @@ app = FastAPI(
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
 )
+
+
+@app.middleware("http")
+async def before_request(request: Request, call_next):
+    user_id = str(uuid.uuid4())
+    result = await check_limit(user_id=user_id)
+    if result:
+        return ORJSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={'detail': 'Too many requests'}
+        )
+    return await call_next(request)
 
 
 app.include_router(auth_router, prefix='/api/v1', tags=['auth'])
