@@ -86,6 +86,7 @@ class RequestNewRoleToUser(BaseModel):
 
 
 class UserResponse(BaseModel):
+    uuid: uuid.UUID
     name: str
     surname: str
     login: str
