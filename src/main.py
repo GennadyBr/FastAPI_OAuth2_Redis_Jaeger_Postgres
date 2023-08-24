@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 import uvicorn
 from fastapi import FastAPI, Request, status
@@ -24,7 +23,7 @@ app = FastAPI(
 
 @app.middleware("http")
 async def before_request(request: Request, call_next):
-    user_id = str(uuid.uuid4())
+    user_id = request.headers.get("X-Forwarded-For")
     result = await check_limit(user_id=user_id)
     if result:
         return ORJSONResponse(
