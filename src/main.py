@@ -47,7 +47,7 @@ app = FastAPI(
 
 FastAPIInstrumentor.instrument_app(app) #Jaeger instrument for tracer, must be after app = FastAPI
 
-@app.middleware("http")
+@app.middleware("http") #добавлено через rebase from dev 2023-08-27 at 16-29
 async def before_request(request: Request, call_next):
     user_id = request.headers.get("X-Forwarded-For")
     result = await check_limit(user_id=user_id)
@@ -58,9 +58,23 @@ async def before_request(request: Request, call_next):
         )
     return await call_next(request)
 
+@app.middleware('http')
+async def before_request(request: Request, call_next):
+    """
+    Обработчик запрета выполнять запросы без заголовка X-Request-Id.
+    Гарантирует, что в случае сбоя вы сможете провести аудит запроса пользователя.
+    """
+    response = await call_next(request)
+    request_id = request.headers.get('X-Request-Id')
+    if not request_id:
+        return ORJSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'detail': 'X-Request-Id is required'})
+    return response
+
+
 
 app.include_router(auth_router, prefix='/api/v1', tags=['auth'])
 app.include_router(role_router, prefix='/api/v1', tags=['role'])
+
 
 if __name__ == '__main__':
     uvicorn.run(
