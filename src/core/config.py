@@ -56,7 +56,12 @@ class RedisSettings(BaseSettings):
         env_prefix = 'redis_'
 
 
+class JWTSetting(BaseSettings):
+    REQUEST_LIMIT_PER_MINUTE: int = 20
+
+
 app_settings = APPSettings()
 token_settings = TokenSettings()
 redis_settings = RedisSettings()
 user_db_settings = UserDBSettings()
+jwt_settings = JWTSetting()
