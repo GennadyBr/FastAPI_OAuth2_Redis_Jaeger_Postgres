@@ -14,6 +14,4 @@ async def check_limit(user_id: str) -> bool:
     await pipe.expire(key, 59)
     result = await pipe.execute()
     request_number = result[0]
-    if request_number > jwt_settings.REQUEST_LIMIT_PER_MINUTE:
-        return True
-    return False
+    return request_number > jwt_settings.REQUEST_LIMIT_PER_MINUTE
