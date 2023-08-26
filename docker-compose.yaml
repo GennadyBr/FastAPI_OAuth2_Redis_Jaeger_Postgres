@@ -20,9 +20,11 @@ services:
     container_name: db_movies
     image: postgres:13
     environment:
-    - POSTGRES_DB=movies_database
-    - POSTGRES_USER=app
-    - POSTGRES_PASSWORD=123qwe
+      POSTGRES_DB: ${PG_MV_DB}
+      POSTGRES_USER: ${PG_MV_USER}
+      POSTGRES_PASSWORD: ${PG_MV_PASSWORD}
+    env_file:
+      - .env
     volumes:
       - postgres_movies:/var/lib/postgresql/data/
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
