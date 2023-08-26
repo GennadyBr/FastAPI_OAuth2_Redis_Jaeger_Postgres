@@ -13,7 +13,7 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from api.v1.roles import router as role_router
 from api.v1.auth import router as auth_router
 from core.logger import LOGGING
-from core.config import app_settings
+from core.config import app_settings, jaeger_settings
 
 def configure_tracer() -> None:
     """
@@ -24,8 +24,8 @@ def configure_tracer() -> None:
     trace.get_tracer_provider().add_span_processor(
         BatchSpanProcessor(
             JaegerExporter(
-                agent_host_name='localhost',
-                agent_port=6831,
+                agent_host_name=jaeger_settings.host,
+                agent_port=jaeger_settings.port_udp,
             )
         )
     )

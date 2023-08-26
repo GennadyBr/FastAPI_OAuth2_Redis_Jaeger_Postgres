@@ -56,7 +56,17 @@ class RedisSettings(BaseSettings):
         env_prefix = 'redis_'
 
 
+class JaegerSettings(BaseSettings):
+    host: str = 'jaeger'
+    port_udp: int = 6831
+    port_tcp: int = 16686
+
+    class Config:
+        env_prefix = 'jaeger_'
+
+
 app_settings = APPSettings()
 token_settings = TokenSettings()
 redis_settings = RedisSettings()
 user_db_settings = UserDBSettings()
+jaeger_settings = JaegerSettings()
