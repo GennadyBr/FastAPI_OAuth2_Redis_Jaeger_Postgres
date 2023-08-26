@@ -59,9 +59,18 @@ class RedisSettings(BaseSettings):
 class JWTSetting(BaseSettings):
     REQUEST_LIMIT_PER_MINUTE: int = 20
 
+class JaegerSettings(BaseSettings):
+    host: str = 'jaeger'
+    port_udp: int = 6831
+    port_tcp: int = 16686
+
+    class Config:
+        env_prefix = 'jaeger_'
+
 
 app_settings = APPSettings()
 token_settings = TokenSettings()
 redis_settings = RedisSettings()
 user_db_settings = UserDBSettings()
 jwt_settings = JWTSetting()
+jaeger_settings = JaegerSettings()
