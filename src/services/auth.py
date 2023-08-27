@@ -147,7 +147,6 @@ class AuthService(AuthServiceBase, HashManagerBase):
         return access_token, refresh_token
 
     async def login(self, login: str, pwd: str, user_agent: str) -> Tuple[str, str]:
-        log.info(f'<<<Service.auth.login>>>')
         log_message = f'Login: {login}, pwd:{pwd}, user_agent:{user_agent}'
         log.debug(log_message)
         user_crud = user_dal.UserDAL(self.user_db_session)
@@ -183,7 +182,6 @@ class AuthService(AuthServiceBase, HashManagerBase):
         return access_token, refresh_token
 
     async def _open_session(self, user: DBUser, user_agent: str) -> Tuple[str, str]:
-        log.info(f'<<<Service.auth._open_session>>>')
         log_msg = f'Open session (user = {user})'
         log.debug(log_msg)
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
@@ -296,7 +294,6 @@ def get_auth_service(token_db: TokenDBBase = Depends(get_token_db),
                      token_manager: TokenManagerBase = Depends(get_token_manager),
                      user_db_session=Depends(get_db),
                      ) -> AuthService:
-    log.info(f'<<<Service.get_auth_service.login>>>')
     log_msg = f'{token_db=}, {token_manager=}, {user_db_session=}'
     log.debug(log_msg)
     return AuthService(token_db, token_manager, user_db_session)

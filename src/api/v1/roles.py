@@ -90,7 +90,6 @@ async def delete_existed_role(role_id: uuid.UUID,
 )
 async def get_user_role(user_id: uuid.UUID,
                         role_service: RoleService = Depends(get_role_service)):
-    log.info(f'<<<V1.role.router.get/user>>>')
     log_msg = f'{user_id=}, {role_service=}'
     log.debug(log_msg)
     roles = await role_service.get_user_access_area(user_id)

@@ -43,7 +43,6 @@ async def login(user: LoginRequest,
                 auth_service: AuthServiceBase = Depends(get_auth_service),
                 user_agent: str = Header(include_in_schema=False),
                 ) -> str:
-    log.info(f'<<<V1.auth.login>>>')
     log_msg = f'Login: {user}, {response=}, {auth_service}, {user_agent=}'
     log.debug(log_msg)
     access_token, refresh_token = await auth_service.login(login=user.login,
