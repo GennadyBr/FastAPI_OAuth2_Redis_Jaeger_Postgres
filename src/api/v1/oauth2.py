@@ -23,10 +23,10 @@ async def oauth2(request: Request):
     user = token.get('userinfo')
     if user:
         request.session['user'] = dict(user)
-    return RedirectResponse(url='/')
+    return RedirectResponse(url='/auth_api/homepage')
 
 
 @router.get('/logout_oauth2')
 async def logout_oauth2(request: Request):
     request.session.pop('user', None)
-    return RedirectResponse(url='/')
+    return RedirectResponse(url='/auth_api/homepage')

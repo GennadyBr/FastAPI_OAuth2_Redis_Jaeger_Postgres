@@ -69,10 +69,10 @@ async def homepage(request: Request):
         data = json.dumps(user)
         html = (
             f'<pre>{data}</pre>'
-            f'<a href={PREFIX}/v1/oauth2/logout_oauth2">logout oauth2</a>'
+            f'<a href="{PREFIX}/v1/oauth2/logout_oauth2">logout oauth2</a>'
         )
         return HTMLResponse(html)
-    return HTMLResponse(f'<a href={PREFIX}/v1/oauth2/login_oauth2">login oauth2</a>')
+    return HTMLResponse(f'<a href="{PREFIX}/v1/oauth2/login_oauth2">login oauth2</a>')
 
 
 @app.middleware("http")
