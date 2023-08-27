@@ -55,7 +55,7 @@ FastAPIInstrumentor.instrument_app(app)  # Jaeger instrument for tracer, must be
 
 
 @app.middleware("http")
-async def before_request(request: Request, call_next):
+async def before_request_check_limit(request: Request, call_next):
     user_id = request.headers.get("X-Forwarded-For")
     result = await check_limit(user_id=user_id)
     if result:
@@ -67,7 +67,7 @@ async def before_request(request: Request, call_next):
 
 
 @app.middleware('http')
-async def before_request(request: Request, call_next):
+async def before_request_add_headers(request: Request, call_next):
     """
     Обработчик заголовка X-Request-Id.
     """
