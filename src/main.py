@@ -1,8 +1,12 @@
+import json
 import logging
+import logging.config
 
 import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.responses import ORJSONResponse
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.responses import HTMLResponse
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
@@ -12,7 +16,7 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 
 from api.v1.roles import router as role_router
 from api.v1.auth import router as auth_router
-import logging.config
+from api.v1.oauth2 import router as oauth2_router
 from core.logger import LOGGING
 from utils.limits import check_limit
 from core.config import app_settings, jaeger_settings
@@ -51,7 +55,23 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
 )
 
+
 FastAPIInstrumentor.instrument_app(app)  # Jaeger instrument for tracer, must be after app = FastAPI
+
+app.add_middleware(SessionMiddleware, secret_key="secret-string")
+
+
+@app.get('/')
+async def homepage(request: Request):
+    user = request.session.get('user')
+    if user:
+        data = json.dumps(user)
+        html = (
+            f'<pre>{data}</pre>'
+            '<a href="/api/v1/oauth2/logout_oauth2">logout oauth2</a>'
+        )
+        return HTMLResponse(html)
+    return HTMLResponse('<a href="/api/v1/oauth2/login_oauth2">login oauth2</a>')
 
 
 @app.middleware("http")
@@ -81,6 +101,7 @@ async def before_request_add_headers(request: Request, call_next):
 
 app.include_router(auth_router, prefix='/api/v1', tags=['auth'])
 app.include_router(role_router, prefix='/api/v1', tags=['role'])
+app.include_router(oauth2_router, prefix='/api/v1', tags=['oauth2'])
 
 if __name__ == '__main__':
     uvicorn.run(
