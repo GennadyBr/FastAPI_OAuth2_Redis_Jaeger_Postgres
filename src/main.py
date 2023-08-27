@@ -24,6 +24,8 @@ from core.config import app_settings, jaeger_settings
 logging.config.dictConfig(LOGGING)
 log = logging.getLogger(__name__)
 
+PREFIX = "/auth_api"
+
 
 def configure_tracer() -> None:
     """
@@ -50,28 +52,27 @@ app = FastAPI(
     description='Auth service for online cinema project',
     summary='API for getting information about users',
     version='0.0.1',
-    docs_url='/api/openapi',
-    openapi_url='/api/openapi.json',
+    docs_url=f'{PREFIX}/openapi',
+    openapi_url=f'{PREFIX}/openapi.json',
     default_response_class=ORJSONResponse,
 )
-
 
 FastAPIInstrumentor.instrument_app(app)  # Jaeger instrument for tracer, must be after app = FastAPI
 
 app.add_middleware(SessionMiddleware, secret_key="secret-string")
 
 
-@app.get('/')
+@app.get(f'{PREFIX}/homepage')
 async def homepage(request: Request):
     user = request.session.get('user')
     if user:
         data = json.dumps(user)
         html = (
             f'<pre>{data}</pre>'
-            '<a href="/api/v1/oauth2/logout_oauth2">logout oauth2</a>'
+            f'<a href={PREFIX}/v1/oauth2/logout_oauth2">logout oauth2</a>'
         )
         return HTMLResponse(html)
-    return HTMLResponse('<a href="/api/v1/oauth2/login_oauth2">login oauth2</a>')
+    return HTMLResponse(f'<a href={PREFIX}/v1/oauth2/login_oauth2">login oauth2</a>')
 
 
 @app.middleware("http")
@@ -92,16 +93,16 @@ async def before_request_add_headers(request: Request, call_next):
     Обработчик заголовка X-Request-Id.
     """
     response = await call_next(request)
-    log.info(f'<<<request_id middleware>>>')
+    log.info('<<<request_id middleware>>>')
     request_id = request.headers.get('X-Request-Id', None)
     log_msg = f'{request_id=}'
     log.debug(log_msg)
     return response
 
 
-app.include_router(auth_router, prefix='/api/v1', tags=['auth'])
-app.include_router(role_router, prefix='/api/v1', tags=['role'])
-app.include_router(oauth2_router, prefix='/api/v1', tags=['oauth2'])
+app.include_router(auth_router, prefix=f'{PREFIX}/v1', tags=['auth'])
+app.include_router(role_router, prefix=f'{PREFIX}/v1', tags=['role'])
+app.include_router(oauth2_router, prefix=f'{PREFIX}/v1', tags=['oauth2'])
 
 if __name__ == '__main__':
     uvicorn.run(
