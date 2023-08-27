@@ -29,13 +29,6 @@ http://localhost:8081/api/openapi
 http://localhost:16686/search
 
 
-## Django Admin
-
-После успешного запуска Django Admin будет доступен по адресу: 
-
-http://localhost/admin/
-
-
 ## Тесты
 
 1. Изменить файл .env.test;
