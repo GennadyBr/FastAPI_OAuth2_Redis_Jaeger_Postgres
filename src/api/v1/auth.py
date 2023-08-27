@@ -43,13 +43,15 @@ async def login(user: LoginRequest,
                 auth_service: AuthServiceBase = Depends(get_auth_service),
                 user_agent: str = Header(include_in_schema=False),
                 ) -> str:
-    log_msg = f'Login: {user}'
+    log_msg = f'Login: {user}, {response=}, {auth_service}, {user_agent=}'
     log.debug(log_msg)
     access_token, refresh_token = await auth_service.login(login=user.login,
                                                            pwd=user.password,
                                                            user_agent=user_agent,
                                                            )
-    log.debug('Set refresh token cookie')
+    log_msg = f'{access_token=}, {refresh_token=}'
+    log.debug(log_msg)
+    log.info('Set refresh token cookie')
     response.set_cookie(key=token_settings.refresh_token_cookie_name,
                         value=refresh_token,
                         httponly=True,
@@ -91,7 +93,10 @@ async def refresh(response: Response,
 async def user_data(token: str = Depends(verify_access_token),
                     auth_service: AuthServiceBase = Depends(get_auth_service),
                     ) -> UserResponse:
+    log.info(f'<<<V1.auth.router.get/me>>>')
     user_data = await auth_service.user_data(token)
+    log_msg = f'{user_data=}, {token=}, {auth_service=}'
+    log.debug(log_msg)
     return UserResponse.from_orm(user_data)
 
 
