@@ -7,6 +7,7 @@ import logging
 from fastapi import status, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import logging.config
 from core.logger import LOGGING
 from db.token import TokenDBBase, get_token_db
 from db.models import User as DBUser, Entry as DBEntry
@@ -146,12 +147,18 @@ class AuthService(AuthServiceBase, HashManagerBase):
         return access_token, refresh_token
 
     async def login(self, login: str, pwd: str, user_agent: str) -> Tuple[str, str]:
+        log.info(f'<<<Service.auth.login>>>')
+        log_message = f'Login: {login}, pwd:{pwd}, user_agent:{user_agent}'
+        log.debug(log_message)
         user_crud = user_dal.UserDAL(self.user_db_session)
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         # проверка наличия пользователя и совпадения пароля
         user = await user_crud.get_by_login(login)
+        log_message = f'{user.login=}, {user.password=}, {user.uuid=}, {user.is_active=}'
+        log.debug(log_message)
         if not user or not self.verify_pwd(pwd.get_secret_value(), user.password):
-            log.debug(f'Login {user.login}: user is exist = {bool(user)}')
+            log_message = f'Login {user.login}: user is exist = {bool(user)}, {pwd.get_secret_value()=}, {user.password=}, {self.verify_pwd(pwd.get_secret_value(), user.password)=}'
+            log.debug(log_message)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail='Incorrect login or password',
@@ -166,18 +173,23 @@ class AuthService(AuthServiceBase, HashManagerBase):
         exist_session = await entry_crud.get_by_user_agent(user_agent, only_active=True)
 
         if exist_session:
-            log.debug(f'Login {user.login}: close session (refresh = {exist_session.refresh_token})')
+            log_msg = f'Login {user.login}: close session (refresh = {exist_session.refresh_token})'
+            log.debug(log_msg)
             await self._close_session(exist_session.refresh_token)
 
         access_token, refresh_token = await self._open_session(user, user_agent)
+        log_msg = f'{access_token=}, {refresh_token=}'
+        log.debug(log_msg)
         return access_token, refresh_token
 
     async def _open_session(self, user: DBUser, user_agent: str) -> Tuple[str, str]:
-        log.debug(f'Open session (user = {user})')
+        log.info(f'<<<Service.auth._open_session>>>')
+        log_msg = f'Open session (user = {user})'
+        log.debug(log_msg)
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         # записать сессию в БД
         session = await entry_crud.create(user.uuid, user_agent, None)
-        log.debug('Generate new tokens')
+        log.info('Generate new tokens')
         access_token, refresh_token = await self._generate_tokens(user, session)
         # записать токен в БД
         await entry_crud.update(session.uuid, refresh_token=refresh_token)
@@ -253,20 +265,20 @@ class AuthService(AuthServiceBase, HashManagerBase):
             token_data.sub,
             password=self.hash_pwd(changed_data.new_password.get_secret_value())
         )
-        log.debug('Logout after changing password')
+        log.info('Logout after changing password')
         await self.logout(access_token, refresh_token)
 
     async def refresh_tokens(self, refresh_token: str, user_agent: str) -> Tuple[str, str]:
         user_crud = user_dal.UserDAL(self.user_db_session)
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         token_data = await self.token_manager.get_data_from_refresh_token(refresh_token)
-        log.debug('Close old session after refresh tokens')
+        log.info('Close old session after refresh tokens')
         await self._close_session(refresh_token)
         # получить пользователя по айди
         user = await user_crud.get(token_data.sub)
         # записать сессию в БД
         session = await entry_crud.create(user.uuid, user_agent, None)
-        log.debug('Generate new tokens')
+        log.info('Generate new tokens')
         access_token, refresh_token = await self._generate_tokens(user, session)
         # записать токен в БД
         await entry_crud.update(session.uuid, refresh_token=refresh_token)
@@ -284,4 +296,7 @@ def get_auth_service(token_db: TokenDBBase = Depends(get_token_db),
                      token_manager: TokenManagerBase = Depends(get_token_manager),
                      user_db_session=Depends(get_db),
                      ) -> AuthService:
+    log.info(f'<<<Service.get_auth_service.login>>>')
+    log_msg = f'{token_db=}, {token_manager=}, {user_db_session=}'
+    log.debug(log_msg)
     return AuthService(token_db, token_manager, user_db_session)

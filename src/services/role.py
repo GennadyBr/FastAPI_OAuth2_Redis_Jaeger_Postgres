@@ -59,6 +59,7 @@ class RoleService(RoleServiceBase):
         self.db = db
 
     async def create_role(self, role_name: str) -> Optional[RoleResponse]:
+        log.info("<<<RoleService.create_role>>>")
         async with self.db as session:
             async with session.begin():
                 log.debug("Create new role")
@@ -74,6 +75,7 @@ class RoleService(RoleServiceBase):
                 return RoleResponse(uuid=role.uuid, name=role.name)
 
     async def read_role(self, role_id: uuid.UUID) -> Optional[RoleResponse]:
+        log.info("<<<RoleService.reade_role (by role_id)>>>")
         async with self.db as session:
             async with session.begin():
                 log.debug(f"Read role {role_id}")
@@ -89,6 +91,7 @@ class RoleService(RoleServiceBase):
                 return RoleResponse(uuid=role.uuid, name=role.name)
 
     async def read_roles(self) -> Optional[List[RoleResponse]]:
+        log.info("<<<RoleService.reade_roles>>>")
         async with self.db as session:
             async with session.begin():
                 log.debug("Read all roles")
@@ -97,6 +100,7 @@ class RoleService(RoleServiceBase):
                 return [RoleResponse(uuid=role.uuid, name=role.name) for role in roles]
 
     async def update_role(self, role_id: uuid.UUID, name: str) -> Optional[RoleResponse]:
+        log.info("<<<RoleService.update_role>>>")
         async with self.db as session:
             async with session.begin():
                 log.debug(f"Update role: {role_id}; new name: {name}")
@@ -114,6 +118,7 @@ class RoleService(RoleServiceBase):
         return updated_role
 
     async def delete_role(self, role_id: uuid.UUID) -> bool:
+        log.info("<<<RoleService.delete_role>>>")
         async with self.db as session:
             async with session.begin():
                 role_dal = RoleDAL(session)
@@ -128,12 +133,18 @@ class RoleService(RoleServiceBase):
                 return bool(deleted_role_id)
 
     async def get_user_access_area(self, user_id: uuid.UUID) -> List[RoleResponse]:
+        log.info(f'<<<RoleService.get_user_access_area>>>')
+        log_msg = f'{user_id=}'
+        log.debug(log_msg)
         async with self.db as session:
             async with session.begin():
-                log.debug(f"Get user's access area: {user_id}")
+                log_msg = f"Get user's access area: {user_id=}"
+                log.debug(log_msg)
                 role_dal = RoleDAL(session)
                 user_dal = UserDAL(session)
                 user_exists = await user_dal.get(user_id)
+                log_msg = f"{user_id=}, {role_dal=}, {user_dal=}, {user_exists=}"
+                log.debug(log_msg)
                 if not user_exists:
                     log.error(f"{status.HTTP_404_NOT_FOUND}: User not found {user_id}")
                     raise HTTPException(
@@ -141,9 +152,12 @@ class RoleService(RoleServiceBase):
                         detail='User does not exist',
                     )
                 user_roles = await role_dal.get_by_user_id(user_id)
+                log_msg = f"{user_roles=}"
+                log.debug(log_msg)
                 return [RoleResponse(uuid=role.uuid, name=role.name) for role in user_roles]
 
     async def set_role_to_user(self, user_id: uuid.UUID, role_id: uuid.UUID) -> bool:
+        log.info(f'<<<RoleService.set_role_to_user>>>')
         async with self.db as session:
             async with session.begin():
                 log.debug(f"Assign new role to user: user - {user_id}; role_id - {role_id}")
@@ -171,6 +185,7 @@ class RoleService(RoleServiceBase):
                 return bool(new_user_role)
 
     async def remove_role_from_user(self, user_id: uuid.UUID, role_id: uuid.UUID) -> bool:
+        log.info(f'<<<RoleService.remove_role_from_user>>>')
         async with self.db as session:
             async with session.begin():
                 log.debug(f"Remove role from user: user - {user_id}; role_id - {role_id}")
@@ -200,4 +215,7 @@ class RoleService(RoleServiceBase):
 
 @lru_cache()
 def get_role_service(db: AsyncSession = Depends(get_db)) -> RoleService:
+    log.info(f'<<<Service.role.get_role_service>>>')
+    log_msg = f'{db=}, {get_db=}'
+    log.debug(log_msg)
     return RoleService(db=db)
