@@ -7,6 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.v1.models import ResponseRole, RequestNewRoleToUser, RequestRole
 from services.role import RoleService, get_role_service
 
+import logging.config
+from core.logger import LOGGING
+
+logging.config.dictConfig(LOGGING)
+log = logging.getLogger(__name__)
+
+
 router = APIRouter(prefix="/role")
 
 
@@ -83,7 +90,11 @@ async def delete_existed_role(role_id: uuid.UUID,
 )
 async def get_user_role(user_id: uuid.UUID,
                         role_service: RoleService = Depends(get_role_service)):
+    log_msg = f'{user_id=}, {role_service=}'
+    log.debug(log_msg)
     roles = await role_service.get_user_access_area(user_id)
+    log_msg = f'{roles=}'
+    log.debug(log_msg)
     if not roles:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Roles are not found')
     return [ResponseRole(uuid=role.uuid, name=role.name) for role in roles]

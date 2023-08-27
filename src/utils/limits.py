@@ -3,8 +3,7 @@ from redis.asyncio import Redis
 
 from core.config import redis_settings, jwt_settings
 
-redis_conn = Redis(host=redis_settings.host, port=redis_settings.port, db=1)
-
+redis_conn = Redis(host=redis_settings.host, port=redis_settings.port, password=redis_settings.password.get_secret_value(), db=1)
 
 async def check_limit(user_id: str) -> bool:
     pipe = redis_conn.pipeline()

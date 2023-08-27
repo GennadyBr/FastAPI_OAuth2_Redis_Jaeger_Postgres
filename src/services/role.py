@@ -128,12 +128,17 @@ class RoleService(RoleServiceBase):
                 return bool(deleted_role_id)
 
     async def get_user_access_area(self, user_id: uuid.UUID) -> List[RoleResponse]:
+        log_msg = f'{user_id=}'
+        log.debug(log_msg)
         async with self.db as session:
             async with session.begin():
-                log.debug(f"Get user's access area: {user_id}")
+                log_msg = f"Get user's access area: {user_id=}"
+                log.debug(log_msg)
                 role_dal = RoleDAL(session)
                 user_dal = UserDAL(session)
                 user_exists = await user_dal.get(user_id)
+                log_msg = f"{user_id=}, {role_dal=}, {user_dal=}, {user_exists=}"
+                log.debug(log_msg)
                 if not user_exists:
                     log.error(f"{status.HTTP_404_NOT_FOUND}: User not found {user_id}")
                     raise HTTPException(
@@ -141,6 +146,8 @@ class RoleService(RoleServiceBase):
                         detail='User does not exist',
                     )
                 user_roles = await role_dal.get_by_user_id(user_id)
+                log_msg = f"{user_roles=}"
+                log.debug(log_msg)
                 return [RoleResponse(uuid=role.uuid, name=role.name) for role in user_roles]
 
     async def set_role_to_user(self, user_id: uuid.UUID, role_id: uuid.UUID) -> bool:
@@ -200,4 +207,6 @@ class RoleService(RoleServiceBase):
 
 @lru_cache()
 def get_role_service(db: AsyncSession = Depends(get_db)) -> RoleService:
+    log_msg = f'{db=}, {get_db=}'
+    log.debug(log_msg)
     return RoleService(db=db)
