@@ -2,7 +2,7 @@ import json
 import logging
 
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.responses import ORJSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import HTMLResponse
@@ -12,6 +12,7 @@ from api.v1.auth import router as auth_router
 from api.v1.oauth2 import router as oauth2_router
 from core.logger import LOGGING
 from core.config import app_settings
+from utils.limits import check_limit
 
 app = FastAPI(
     title=app_settings.project_name,
@@ -37,6 +38,18 @@ async def homepage(request: Request):
         )
         return HTMLResponse(html)
     return HTMLResponse('<a href="/api/v1/oauth2/login_oauth2">login oauth2</a>')
+
+
+@app.middleware("http")
+async def before_request(request: Request, call_next):
+    user_id = request.headers.get("X-Forwarded-For")
+    result = await check_limit(user_id=user_id)
+    if result:
+        return ORJSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={'detail': 'Too many requests'}
+        )
+    return await call_next(request)
 
 
 app.include_router(auth_router, prefix='/api/v1', tags=['auth'])
