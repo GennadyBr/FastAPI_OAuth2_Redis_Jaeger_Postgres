@@ -6,6 +6,8 @@ from core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
+enable_tracer = True
+
 
 class APPSettings(BaseSettings):
     project_name: str = 'Auth API'
@@ -58,6 +60,7 @@ class RedisSettings(BaseSettings):
 
 class JWTSetting(BaseSettings):
     REQUEST_LIMIT_PER_MINUTE: int = 20
+
 
 class JaegerSettings(BaseSettings):
     host: str = 'jaeger'
