@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, Boolean, String, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
 ##############################
 # BLOCK WITH DATABASE MODELS #
@@ -24,6 +24,8 @@ class User(Base):
     email = Column(String(100), nullable=False, unique=True)
     is_active = Column(Boolean(), default=True)
     password = Column(String(100), nullable=False)
+    entries = relationship("Entry", back_populates="user")
+    user_roles = relationship("UserRole", back_populates="user")
 
 
 class Role(Base):
@@ -31,6 +33,7 @@ class Role(Base):
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(100), nullable=False, unique=True)   # я подумал что название ролей должно быть уникальным
+    user_roles = relationship("UserRole", back_populates="role")
 
 
 class Entry(Base):
@@ -42,6 +45,7 @@ class Entry(Base):
     date_time = Column(DateTime, default=datetime.utcnow, nullable=False)
     refresh_token = Column(String(100))
     is_active = Column(Boolean(), default=True)
+    user = relationship("User", back_populates="entries")
 
 
 class UserRole(Base):
@@ -50,6 +54,8 @@ class UserRole(Base):
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey(User.uuid), nullable=False)
     role_id = Column(UUID(as_uuid=True), ForeignKey(Role.uuid), nullable=False)
+    user = relationship("User", back_populates="user_roles")
+    role = relationship("Role", back_populates="user_roles")
 
 
 class UserSocial(Base):
