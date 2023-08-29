@@ -50,3 +50,11 @@ class UserRole(Base):
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey(User.uuid), nullable=False)
     role_id = Column(UUID(as_uuid=True), ForeignKey(Role.uuid), nullable=False)
+
+
+class UserSocial(Base):
+    __tablename__ = 'user_socials'
+
+    uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    sub_id = Column(UUID(as_uuid=True), nullable=False)
+    provider = Column(String(100))
