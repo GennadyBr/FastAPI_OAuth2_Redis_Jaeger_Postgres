@@ -1,4 +1,4 @@
-"""create role super_user
+"""create table user_socials
 
 Revision ID: z00000000003
 Revises: 7c4f75442607
