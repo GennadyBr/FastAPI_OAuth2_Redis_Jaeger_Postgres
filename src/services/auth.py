@@ -5,6 +5,7 @@ from functools import lru_cache
 import logging
 
 from fastapi import status, HTTPException, Depends
+from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import logging.config
@@ -12,10 +13,9 @@ from core.logger import LOGGING
 from db.token import TokenDBBase, get_token_db
 from db.models import User as DBUser, Entry as DBEntry
 from models import user as user_models
-from crud import user as user_dal, role as role_dal, entry as entry_dal
+from crud import user as user_dal, role as role_dal, entry as entry_dal, crud_social as user_socials_dal
 from utils.token_manager import TokenManagerBase, get_token_manager
 from db.session import get_db
-
 
 logging.config.dictConfig(LOGGING)
 log = logging.getLogger(__name__)
@@ -112,12 +112,14 @@ class AuthService(AuthServiceBase, HashManagerBase):
     def verify_pwd(self, pwd_in: str, pwd_hash: str) -> bool:
         return bcrypt.checkpw(pwd_in.encode('utf-8'), pwd_hash.encode('utf-8'))
 
-    async def register(self, user: user_models.UserCreate) -> DBUser:
+    async def register(self, user: user_models.UserCreate, provider: str = None) -> DBUser:
         user_crud = user_dal.UserDAL(self.user_db_session)
         # проверка на существование пользователя
         email_is_exist = await user_crud.get_by_email(user.email)
         login_is_exist = await user_crud.get_by_login(user.login)
-        log.debug(f'User already exist: email={user.email} (exists = {email_is_exist}); login={user.login} (exists = {login_is_exist})')
+        log.debug(f'User already exist: email={user.email}'
+                  f' (exists = {email_is_exist});'
+                  f' login={user.login} (exists = {login_is_exist})')
         if email_is_exist or login_is_exist:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -128,6 +130,10 @@ class AuthService(AuthServiceBase, HashManagerBase):
         new_user = await user_crud.create(**user.dict(exclude={'password', }),
                                           password=self.hash_pwd(user.password.get_secret_value()),
                                           )
+        if provider:
+            user_social_crud = user_socials_dal.UserSocialDAL(self.user_db_session)
+            new_user_social = await user_social_crud.create(new_user.uuid, user.login, provider=provider)
+            log.debug(f'Create new user social: {new_user_social.user_id}, {provider=}')
         return new_user
 
     async def _generate_tokens(self,
@@ -146,7 +152,7 @@ class AuthService(AuthServiceBase, HashManagerBase):
         refresh_token = await self.token_manager.generate_refresh_token(token_payload)
         return access_token, refresh_token
 
-    async def login(self, login: str, pwd: str, user_agent: str) -> Tuple[str, str]:
+    async def login(self, login: str, pwd: SecretStr, user_agent: str) -> Tuple[str, str]:
         log_message = f'Login: {login}, pwd:{pwd}, user_agent:{user_agent}'
         log.debug(log_message)
         user_crud = user_dal.UserDAL(self.user_db_session)
@@ -156,7 +162,10 @@ class AuthService(AuthServiceBase, HashManagerBase):
         log_message = f'{user.login=}, {user.password=}, {user.uuid=}, {user.is_active=}'
         log.debug(log_message)
         if not user or not self.verify_pwd(pwd.get_secret_value(), user.password):
-            log_message = f'Login {user.login}: user is exist = {bool(user)}, {pwd.get_secret_value()=}, {user.password=}, {self.verify_pwd(pwd.get_secret_value(), user.password)=}'
+            log_message = f'Login {user.login}: ' \
+                          f'user is exist = {bool(user)}, ' \
+                          f'{pwd.get_secret_value()=}, {user.password=},' \
+                          f' {self.verify_pwd(pwd.get_secret_value(), user.password)=}'
             log.debug(log_message)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -231,7 +240,8 @@ class AuthService(AuthServiceBase, HashManagerBase):
     async def entry_history(self, access_token: str, unique: bool, page_size: int, page_number: int) -> List[DBEntry]:
         entry_crud = entry_dal.EntryDAL(self.user_db_session)
         token_data = await self.token_manager.get_data_from_access_token(access_token)
-        entry_history = await entry_crud.get_by_user_id(token_data.sub, unique=unique, page_size=page_size, page_number=page_number)
+        entry_history = await entry_crud.get_by_user_id(token_data.sub, unique=unique, page_size=page_size,
+                                                        page_number=page_number)
         return entry_history
 
     async def user_data(self, access_token: str) -> DBUser:

@@ -71,5 +71,6 @@ class UserSocial(Base):
     __tablename__ = 'user_socials'
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    sub_id = Column(UUID(as_uuid=True), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(User.uuid), nullable=False)
+    sub_id = Column(String(100), nullable=False)
     provider = Column(String(100))

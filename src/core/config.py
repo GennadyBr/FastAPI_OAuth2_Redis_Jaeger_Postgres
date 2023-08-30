@@ -71,9 +71,14 @@ class JaegerSettings(BaseSettings):
         env_prefix = 'jaeger_'
 
 
+class Oauth2Settings(BaseSettings):
+    PASSWORD_GEN_SECRET_KEY: str = "123qwe"
+
+
 app_settings = APPSettings()
 token_settings = TokenSettings()
 redis_settings = RedisSettings()
 user_db_settings = UserDBSettings()
 jwt_settings = JWTSetting()
 jaeger_settings = JaegerSettings()
+oauth2_settings = Oauth2Settings()
