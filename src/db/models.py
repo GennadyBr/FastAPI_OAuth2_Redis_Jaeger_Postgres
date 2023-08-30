@@ -30,7 +30,7 @@ class Role(Base):
     __tablename__ = 'role'
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(100), nullable=False, unique=True)   # я подумал что название ролей должно быть уникальным
+    name = Column(String(100), nullable=False, unique=True)  # я подумал что название ролей должно быть уникальным
 
 
 class Entry(Base):
@@ -56,5 +56,6 @@ class UserSocial(Base):
     __tablename__ = 'user_socials'
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    sub_id = Column(UUID(as_uuid=True), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey(User.uuid), nullable=False)
+    sub_id = Column(String(100), nullable=False)
     provider = Column(String(100))
