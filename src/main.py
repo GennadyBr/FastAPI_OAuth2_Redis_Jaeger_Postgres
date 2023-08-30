@@ -77,7 +77,9 @@ async def homepage(request: Request):
             f'<a href="{PREFIX}/v1/oauth2/logout_oauth2">logout oauth2</a>'
         )
         return HTMLResponse(html)
-    return HTMLResponse(f'<a href="{PREFIX}/v1/oauth2/login_oauth2">login oauth2</a>')
+    return HTMLResponse(
+        f'<a href="{PREFIX}/v1/oauth2/login_oauth2">login oauth2</a> '
+        + f'<a href="{PREFIX}/v1/oauth2/register_oauth2">register oauth2</a>')
 
 
 @app.middleware("http")
