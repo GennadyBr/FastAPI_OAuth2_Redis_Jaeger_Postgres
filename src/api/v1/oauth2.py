@@ -91,7 +91,7 @@ async def oauth2_registration(request: Request, auth_service: AuthServiceBase = 
         password=password
     )
 
-    register_user = await auth_service.register(new_user)
+    register_user = await auth_service.register(new_user, provider="google")
     return UserResponse.from_orm(register_user)
 
 

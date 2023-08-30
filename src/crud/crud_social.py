@@ -2,7 +2,7 @@ from uuid import UUID
 from typing import Union, Optional, List
 
 from fastapi import status, HTTPException
-from sqlalchemy import update, tuple_, select, exc
+from sqlalchemy import update, select, exc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import logging.config
@@ -11,7 +11,7 @@ from core.logger import LOGGING
 logging.config.dictConfig(LOGGING)
 log = logging.getLogger(__name__)
 
-from db.models import User_socials
+from db.models import UserSocial
 from crud.base_classes import CrudBase
 
 
@@ -21,13 +21,13 @@ class UserSocialDAL(CrudBase):
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
-    async def create(self, user_id: UUID, sub_id, provider: str) -> Optional[User_socials]:
+    async def create(self, user_id: UUID, sub_id, provider: str) -> Optional[UserSocial]:
         """Create User_socials"""
         log_message = f'CRUD Create user social: user_id={user_id}, sub_id={sub_id}, provider={provider}'
         log.debug(log_message)
-        new_user_social = User_socials(
+        new_user_social = UserSocial(
             user_id=user_id,
-            sub_id=sub_id,
+            sub_id=str(sub_id),
             provider=provider,
         )
         try:
@@ -42,7 +42,7 @@ class UserSocialDAL(CrudBase):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail='Error creating user social',
             )
-        except Exception as err:
+        except Exception:
             log.error('CRUD user social Create Unknown Error', exc_info=True)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -54,9 +54,9 @@ class UserSocialDAL(CrudBase):
         log_message = f'CRUD Delete User_socials: id={id}'
         log.debug(log_message)
         try:
-            query = update(User_socials). \
-                where(User_socials.uuid == id). \
-                returning(User_socials.uuid)
+            query = update(UserSocial). \
+                where(UserSocial.uuid == id). \
+                returning(UserSocial.uuid)
             res = await self.db_session.execute(query)
             await self.db_session.commit()
             deleted_user_social_id_row = res.fetchone()
@@ -70,19 +70,19 @@ class UserSocialDAL(CrudBase):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail='Error deleting user social',
             )
-        except Exception as err:
+        except Exception:
             log.error('CRUD user social Delete Unknown Error', exc_info=True)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail='Error deleting user social',
             )
 
-    async def get(self, id: UUID) -> Optional[User_socials]:
+    async def get(self, id: UUID) -> Optional[UserSocial]:
         """Get User_socials"""
         log_message = f'CRUD Get User_socials: id={id}'
         log.debug(log_message)
         try:
-            query = select(User_socials).where(User_socials.uuid == id)
+            query = select(UserSocial).where(UserSocial.uuid == id)
             res = await self.db_session.execute(query)
             user_social_row = res.fetchone()
             if user_social_row is not None:
@@ -91,7 +91,7 @@ class UserSocialDAL(CrudBase):
             log_message = f'Get query error: user social uuid = {id}'
             log.error(log_message)
             log.error(err)
-        except Exception as err:
+        except Exception:
             log.error('CRUD user social Get Unknown Error', exc_info=True)
 
     async def update(self, id: UUID, **kwargs) -> Optional[UUID]:
@@ -99,10 +99,10 @@ class UserSocialDAL(CrudBase):
         log_message = f'CRUD Update User_socials: id={id}'
         log.debug(log_message)
         try:
-            query = update(User_socials). \
-                where(User_socials.uuid == id). \
+            query = update(UserSocial). \
+                where(UserSocial.uuid == id). \
                 values(kwargs). \
-                returning(User_socials.uuid)
+                returning(UserSocial.uuid)
             res = await self.db_session.execute(query)
             await self.db_session.commit()
             update_user_social_id_row = res.fetchone()
@@ -116,7 +116,7 @@ class UserSocialDAL(CrudBase):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail='Error updating user social',
             )
-        except Exception as err:
+        except Exception:
             log.error('CRUD Entry Update Unknown Error', exc_info=True)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -125,12 +125,12 @@ class UserSocialDAL(CrudBase):
 
     async def get_by_user_id(self,
                              user_id: UUID,
-                             ) -> Optional[List[User_socials]]:
+                             ) -> Optional[List[UserSocial]]:
         """Get User_socials by id"""
         log_message = f'CRUD Get User_socials User by id: user_id={user_id}'
         log.debug(log_message)
         try:
-            query = select(User_socials).where(User_socials.user_id == user_id)
+            query = select(UserSocial).where(UserSocial.user_id == user_id)
             res = await self.db_session.execute(query)
             user_socials = res.scalars().fetchall()
             return user_socials
@@ -139,5 +139,5 @@ class UserSocialDAL(CrudBase):
             log.error(log_message)
             log.error(err)
 
-        except Exception as err:
+        except Exception:
             log.error('CRUD user social Get by user_id query Unknown Error', exc_info=True)

@@ -13,7 +13,7 @@ from core.logger import LOGGING
 from db.token import TokenDBBase, get_token_db
 from db.models import User as DBUser, Entry as DBEntry
 from models import user as user_models
-from crud import user as user_dal, role as role_dal, entry as entry_dal
+from crud import user as user_dal, role as role_dal, entry as entry_dal, crud_social as user_socials_dal
 from utils.token_manager import TokenManagerBase, get_token_manager
 from db.session import get_db
 
@@ -131,7 +131,9 @@ class AuthService(AuthServiceBase, HashManagerBase):
                                           password=self.hash_pwd(user.password.get_secret_value()),
                                           )
         if provider:
-            pass
+            user_social_crud = user_socials_dal.UserSocialDAL(self.user_db_session)
+            new_user_social = await user_social_crud.create(new_user.uuid, user.login, provider=provider)
+            log.debug(f'Create new user social: {new_user_social.user_id}, {provider=}')
         return new_user
 
     async def _generate_tokens(self,
