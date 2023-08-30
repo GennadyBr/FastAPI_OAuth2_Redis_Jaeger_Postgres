@@ -7,7 +7,7 @@ from pydantic import SecretStr
 from starlette.responses import HTMLResponse, RedirectResponse
 
 from api.v1.models import UserResponse
-from core.config import token_settings
+from core.config import token_settings, oauth2_settings
 from core.logger import LOGGING
 from models.user import UserCreate
 from utils.oauth_client import oauth
@@ -17,7 +17,7 @@ router = APIRouter(prefix='/oauth2')
 logging.config.dictConfig(LOGGING)
 log = logging.getLogger(__name__)
 
-PASSWORD_SECRET_KEY = "123qwe"
+PASSWORD_SECRET_KEY = oauth2_settings.PASSWORD_GEN_SECRET_KEY
 
 
 @router.get('/login_oauth2')
