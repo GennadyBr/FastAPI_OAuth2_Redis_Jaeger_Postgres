@@ -19,7 +19,7 @@
 
 После успешного запуска документация будет доступна по адресу: 
 
-http://localhost:8081/api/openapi
+http://localhost/auth_api/openapi
 
 
 ## Jaeger UI
