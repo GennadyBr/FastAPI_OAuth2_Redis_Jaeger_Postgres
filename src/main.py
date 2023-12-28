@@ -1,5 +1,4 @@
 import json
-import logging
 import logging.config
 
 import uvicorn
@@ -54,7 +53,7 @@ if enable_tracer:
 
 app = FastAPI(
     title=app_settings.project_name,
-    description='Auth service for online cinema project',
+    description='Auth service',
     summary='API for getting information about users',
     version='0.0.1',
     docs_url=f'{PREFIX}/openapi',
