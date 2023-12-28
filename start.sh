@@ -5,7 +5,7 @@
 sudo docker network create nginx_proxy
 sudo docker-compose down
 sudo docker-compose up -d --build
-sudo docker logs nginx_proxy
+sudo docker logs auth_app
 
 sudo docker network inspect nginx_proxy
 
