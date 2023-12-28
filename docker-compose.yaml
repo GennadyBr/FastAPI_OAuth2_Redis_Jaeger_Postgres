@@ -4,6 +4,8 @@ version: '3'
 services:
   db_users:
     image: postgres:13
+    container_name: db_users
+    restart: always
     environment:
       POSTGRES_DB: ${PG_DB_NAME}
       POSTGRES_USER: ${PG_DB_USER}
@@ -15,39 +17,44 @@ services:
 
   redis_token:
     image: redis:7.2-rc2
+    container_name: redis_token
+    restart: always
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
-    restart: on-failure
     env_file:
       - .env
 
   auth_app:
     build: .
+    container_name: auth_app
+    restart: always
     env_file:
       - .env
     depends_on:
       - redis_token
       - db_users
 
-  nginx:
-    image: nginx:1.25.1-alpine
-    depends_on:
-      - auth_app
-    ports:
-      - "${NGINX_PORT}:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx:/etc/nginx/conf.d:ro
+#  nginx:
+#    image: nginx:1.25.1-alpine
+#    depends_on:
+#      - auth_app
+#    ports:
+#      - "${NGINX_PORT}:80"
+#    volumes:
+#      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+#      - ./nginx:/etc/nginx/conf.d:ro
 
   jaeger:
     image: jaegertracing/all-in-one:1.48
+    container_name: jaeger
+    restart: always
     ports:
       - "${JEAGER_PORT_UDP}/udp"
       - "${JEAGER_PORT_TCP}/tcp"
     depends_on:
       - auth_app
-      - nginx
+#      - nginx
 
 volumes:
   postgres_data:
