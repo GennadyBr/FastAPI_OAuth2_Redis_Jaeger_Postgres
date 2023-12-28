@@ -58,3 +58,8 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  default:
+    name: nginx_proxy
+    external: true
